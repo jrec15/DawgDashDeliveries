@@ -1,15 +1,18 @@
+import java.util.ArrayList;
+
 
 public class Worker {
-	int ID;
-	String name;
-	String email;
-	String password;
-	int transportation;
-	int rating;
-	int totalRatings;
-	int totalDeliveries;
-	int pendingDeliveries;
-	String role;
+	private int ID;
+	private String name;
+	private String email;
+	private String password;
+	private int transportation;
+	private int rating;
+	private int totalRatings;
+	private int totalDeliveries;
+	private int pendingDeliveries;
+	private String role;
+	private ArrayList<Delivery> deliveryList = new ArrayList<Delivery>;
 	
 	public Worker(int ID, String name, String email, String password, int transportation, 
 			int rating, int totalRatings, int totalDeliveries, int pendingDeliveries, String role) {
@@ -24,6 +27,14 @@ public class Worker {
 		this.pendingDeliveries = pendingDeliveries;
 	}
 	
+	public ArrayList<Delivery> getDeliveryList() {
+		return deliveryList;
+	}
+
+	public void setDeliveryList(ArrayList<Delivery> deliveryList) {
+		this.deliveryList = deliveryList;
+	}
+
 	public int getID() {
 		return ID;
 	}

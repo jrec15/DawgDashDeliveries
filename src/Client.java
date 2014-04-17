@@ -1,11 +1,11 @@
 
 public class Client {
-	int ID;
-	String name;
-	String defaultAddress;
-	String email;
-	String username;
-	String password;
+	private int ID;
+	private String name;
+	private String defaultAddress;
+	private String email;
+	private String username;
+	private String password;
 	
 	public Client(int ID, String name, String defaultAddress, String email, String username, String password) {
 		this.ID = ID;
