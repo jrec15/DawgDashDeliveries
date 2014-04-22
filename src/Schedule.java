@@ -9,6 +9,32 @@ public class Schedule {
 	private String friday;
 	private String saturday;
 	
+	/**
+	 * Initializes a schedule for a worker to default values.
+	 * @param workerID
+	 */
+	public Schedule(int workerID) {
+		this.workerID = workerID;
+		this.sunday = "00-00";
+		this.monday = "00-00";
+		this.tuesday = "00-00";
+		this.wednesday = "00-00";
+		this.thursday = "00-00";
+		this.friday = "00-00";
+		this.saturday = "00-00";
+	}
+	
+	/**
+	 * Creates a schedule based on a worker and his hours. NOTE for now format as "xx-xx"
+	 * @param workerID
+	 * @param sunday
+	 * @param monday
+	 * @param tuesday
+	 * @param wednesday
+	 * @param thursday
+	 * @param friday
+	 * @param saturday
+	 */
 	public Schedule(int workerID, String sunday, String monday, String tuesday, String wednesday,
 			String thursday, String friday, String saturday) {
 		this.workerID = workerID;

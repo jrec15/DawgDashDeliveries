@@ -5,6 +5,7 @@ public class Worker {
 	private int ID;
 	private String name;
 	private String email;
+	private String username;
 	private String password;
 	private int transportation;
 	private int rating;
@@ -12,25 +13,68 @@ public class Worker {
 	private int totalDeliveries;
 	private int pendingDeliveries;
 	private String role;
-	private ArrayList<Delivery> deliveryList = new ArrayList<Delivery>;
+	private ArrayList<Delivery> deliveryList;
 	
-	public Worker(int ID, String name, String email, String password, int transportation, 
-			int rating, int totalRatings, int totalDeliveries, int pendingDeliveries, String role) {
+	/**
+	 * Creates a when a new worker is added. We should know some of the paramters, and initialize
+	 * the rest to default values;
+	 * @param name
+	 * @param email
+	 * @param username
+	 * @param password
+	 * @param transportation
+	 * @param role
+	 */
+	public Worker(String name, String email, String username, String password, int transportation, String role) {
+		ID = 0;
+		this.name = name;
+		this.email = email;
+		this.username = username;
+		this.password = password;
+		this.transportation = transportation;
+		rating = 0;
+		totalRatings = 0;
+		totalDeliveries = 0;
+		pendingDeliveries = 0;
+		this.role = role;
+		deliveryList = null; //NOT sure what to do here
+	}
+	
+	/**
+	 * Creates a worker when we know all the parameters (retrieving from database)
+	 * @param ID
+	 * @param name
+	 * @param email
+	 * @param username
+	 * @param password
+	 * @param transportation
+	 * @param rating
+	 * @param totalRatings
+	 * @param totalDeliveries
+	 * @param pendingDeliveries
+	 * @param role
+	 * @throws Exception
+	 */
+	public Worker(int ID, String name, String email, String username, String password, int transportation, 
+			int rating, int totalRatings, int totalDeliveries, int pendingDeliveries, String role) throws Exception {
 		this.ID = ID;
 		this.name = name;
 		this.email = email;
+		this.username = username;
 		this.password = password;
 		this.transportation = transportation;
 		this.rating = rating;
 		this.totalRatings = totalRatings;
 		this.totalDeliveries = totalDeliveries;
 		this.pendingDeliveries = pendingDeliveries;
+		DBHelper instance = new DBHelper();
+		deliveryList = instance.getDeliveryListWorker(ID);
 	}
 	
 	public ArrayList<Delivery> getDeliveryList() {
 		return deliveryList;
 	}
-
+	
 	public void setDeliveryList(ArrayList<Delivery> deliveryList) {
 		this.deliveryList = deliveryList;
 	}

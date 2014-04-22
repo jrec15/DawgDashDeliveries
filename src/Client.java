@@ -7,6 +7,24 @@ public class Client {
 	private String username;
 	private String password;
 	
+	public Client(String name, String defaultAddress, String email, String username, String password) {
+		ID = 0;
+		this.name = name;
+		this.defaultAddress = defaultAddress;
+		this.email = email;
+		this.username = username;
+		this.password = password;
+	}
+	
+	/**
+	 * Creates a client when we know all the parameters
+	 * @param ID
+	 * @param name
+	 * @param defaultAddress
+	 * @param email
+	 * @param username
+	 * @param password
+	 */
 	public Client(int ID, String name, String defaultAddress, String email, String username, String password) {
 		this.ID = ID;
 		this.name = name;
