@@ -38,18 +38,35 @@ class Delivery {
 			 	 //ASSUMING we are putting schedule times in a "xx-xx" format as this seems best
 			 	 //Leaving minutes OUT for now. Would take a good bit more code. Could add in 30 mins pretty easily though
 				 case (1) : String[] sunday = schedule.getSunday().split("-");
-				 			if (Integer.parseInt(sunday[0]) < Calendar.HOUR_OF_DAY) {
-				 				if (Integer.parseInt(sunday[1]) > Calendar.HOUR_OF_DAY) {
-				 					//NOTE: remember to update schedule at the end since worker is now on a job. This is
-				 					//very tricky ATM since I don't have minutes and we aren't calculating duration
-				 					if (worker.getRating() > maxRating) {
-				 							bestWorker = worker;
-				 					}
+				 			if (Integer.parseInt(sunday[0]) <= Calendar.HOUR_OF_DAY) {
+				 				boolean check = true;
+				 				if (Integer.parseInt(sunday[0]) == Calendar.HOUR_OF_DAY) {
+				 					check = false;
+				 					if (Integer.parseInt(sunday[1]) <= Calendar.MINUTE) 
+				 						check = true;
+					 				if (check == true) {
+						 				if (Integer.parseInt(sunday[2]) >= Calendar.HOUR_OF_DAY) {
+						 					//NOTE: remember to update schedule at the end since worker is now on a job. This is
+						 					//very tricky ATM since I don't have minutes and we aren't calculating duration
+						 					if (Integer.parseInt(sunday[2]) == Calendar.HOUR_OF_DAY) {
+						 						check = false;
+						 						//This would mean a worker with 1 min left in schedule could be assigned
+						 						//a job. Let's stick to 15 or 30 min intervals to avoid this dilemma. 
+						 						if (Integer.parseInt(sunday[3]) > Calendar.MINUTE)
+						 							check = true;
+						 						if (check == true) {
+						 							if (worker.getRating() > maxRating) {
+						 								bestWorker = worker;
+						 							}
+						 						}
+						 					}
+						 				}
+					 				}
 				 				}
 				 			}
 				 			break;
 				 case (2) : String[] monday = schedule.getMonday().split("-");
-							if (Integer.parseInt(monday[0]) < Calendar.HOUR_OF_DAY) {
+							if (Integer.parseInt(monday[0]) <= Calendar.HOUR_OF_DAY) {
 					 			if (Integer.parseInt(monday[1]) > Calendar.HOUR_OF_DAY) {
 					 				//NOTE: remember to update schedule at the end since worker is now on a job. This is
 					 				//very tricky ATM since I don't have minutes and we aren't calculating duration
@@ -60,7 +77,7 @@ class Delivery {
 				 			}
 				 			break;
 				 case (3) : String[] tuesday = schedule.getTuesday().split("-");
-							if (Integer.parseInt(tuesday[0]) < Calendar.HOUR_OF_DAY) {
+							if (Integer.parseInt(tuesday[0]) <= Calendar.HOUR_OF_DAY) {
 								if (Integer.parseInt(tuesday[1]) > Calendar.HOUR_OF_DAY) {
 					 				//NOTE: remember to update schedule at the end since worker is now on a job. This is
 					 				//very tricky ATM since I don't have minutes and we aren't calculating duration
@@ -71,7 +88,7 @@ class Delivery {
 				 			}
 		 					break;
 				 case (4) : String[] wednesday = schedule.getWednesday().split("-");
-							if (Integer.parseInt(wednesday[0]) < Calendar.HOUR_OF_DAY) {
+							if (Integer.parseInt(wednesday[0]) <= Calendar.HOUR_OF_DAY) {
 					 			if (Integer.parseInt(wednesday[1]) > Calendar.HOUR_OF_DAY) {
 					 				//NOTE: remember to update schedule at the end since worker is now on a job. This is
 									//very tricky ATM since I don't have minutes and we aren't calculating duration
@@ -82,7 +99,7 @@ class Delivery {
 					 		}
 		 					break;
 				 case (5) : String[] thursday = schedule.getThursday().split("-");
-						 	if (Integer.parseInt(thursday[0]) < Calendar.HOUR_OF_DAY) {
+						 	if (Integer.parseInt(thursday[0]) <= Calendar.HOUR_OF_DAY) {
 					 			if (Integer.parseInt(thursday[1]) > Calendar.HOUR_OF_DAY) {
 					 				//NOTE: remember to update schedule at the end since worker is now on a job. This is
 					 				//very tricky ATM since I don't have minutes and we aren't calculating duration
@@ -93,7 +110,7 @@ class Delivery {
 				 			}
 		 					break;
 				 case (6) : String[] friday = schedule.getFriday().split("-");
-				 			if (Integer.parseInt(friday[0]) < Calendar.HOUR_OF_DAY) {
+				 			if (Integer.parseInt(friday[0]) <= Calendar.HOUR_OF_DAY) {
 					 			if (Integer.parseInt(friday[1]) > Calendar.HOUR_OF_DAY) {
 					 				//NOTE: remember to update schedule at the end since worker is now on a job. This is
 									//very tricky ATM since I don't have minutes and we aren't calculating duration
@@ -104,7 +121,7 @@ class Delivery {
 					 		}
 		 					break;
 				 case (7) : String[] saturday = schedule.getSaturday().split("-");
-				 			if (Integer.parseInt(saturday[0]) < Calendar.HOUR_OF_DAY) {
+				 			if (Integer.parseInt(saturday[0]) <= Calendar.HOUR_OF_DAY) {
 				 				if (Integer.parseInt(saturday[1]) > Calendar.HOUR_OF_DAY) {
 					 				//NOTE: remember to update schedule at the end since worker is now on a job. This is
 					 				//very tricky ATM since I don't have minutes and we aren't calculating duration

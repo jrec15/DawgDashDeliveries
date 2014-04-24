@@ -62,27 +62,6 @@ public class DBHelper {
 	public Delivery getDelivery(int deliveryID);
 	//
 	
-	//Ignore for now
-	public void assignDelivery(Estimate estimate, rest of parameters) {
-		for (through workers) {
-			switch:
-			asap {	
-				if (currently scheduled) {
-					if (not on a job) {
-						add to result list;
-					}
-				}
-			}
-			future {
-					
-			}
-		}
-		for (through result list) {
-			keep track of who has highest rating;
-			store as a result;
-		}
-		assign to that worker;
-	}
 	//justin
 	public void addClient(Client client) {
 		try {
@@ -237,7 +216,7 @@ public class DBHelper {
 	}
 	//end justin
 	//David Seivitch
-	public void checkIfValidLogin(paramaters); 
+	public boolean checkIfValidLogin(parameters); 
 	
 	public void changePassword(parameters);
 	
