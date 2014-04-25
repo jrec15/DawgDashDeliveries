@@ -1,3 +1,5 @@
+//package dawgdashdeliveries;
+
 import java.util.ArrayList;
 
 
@@ -5,7 +7,7 @@ public class Worker {
 	private int ID;
 	private String name;
 	private String email;
-	private String username;
+	private String username; // i dint think we use this, name can be username
 	private String password;
 	private int transportation;
 	private int rating;
@@ -26,7 +28,7 @@ public class Worker {
 	 * @param role
 	 */
 	public Worker(String name, String email, String username, String password, int transportation, String role) {
-		ID = 0;
+		ID = 0;//Questioning the id
 		this.name = name;
 		this.email = email;
 		this.username = username;
@@ -67,6 +69,7 @@ public class Worker {
 		this.totalRatings = totalRatings;
 		this.totalDeliveries = totalDeliveries;
 		this.pendingDeliveries = pendingDeliveries;
+		this.role = role;
 		DBHelper instance = new DBHelper();
 		deliveryList = instance.getDeliveryListWorker(ID);
 	}
@@ -140,6 +143,12 @@ public class Worker {
 		this.role = role;
 	}
 	
+	public void setUsername(String username){
+		this.username = username;
+	}
 	
+	public String getUsername(){
+		return username;
+    }
 	
 }
