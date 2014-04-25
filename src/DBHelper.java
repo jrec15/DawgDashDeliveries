@@ -29,12 +29,15 @@ public class DBHelper {
     protected PreparedStatement changeWorkerTransportation;
     protected PreparedStatement removeClient;
     protected PreparedStatement removeWorker;
+    protected PreparedStatement checkIfValidLoginWorker;
+    protected PreparedStatement checkIfUsernameExistsWorker;
+    protected PreparedStatement checkIfValidLoginClient;
+    protected PreparedStatement checkIfUsernameExistsClient;
     
-
 	public DBHelper() throws Exception {
 		//Might need to change to match your info
 		
-		String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
+        String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 		String DB_USER = "root";
 		String DB_PASS = "";
 		//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
@@ -71,7 +74,11 @@ public class DBHelper {
             changeWorkerPassword = conn.prepareStatement("UPDATE `Worker` SET `Password` = ? WHERE `Name` = ?");
             removeClient = conn.prepareStatement("DELETE FROM `Client` WHERE `Name` = ?");
             removeWorker = conn.prepareStatement("DELETE FROM `Worker` WHERE `Name` = ?");
-            
+            checkIfValidLoginWorker = conn.prepareStatement("SELECT `Password` FROM `Worker` WHERE `Username` = ?");
+            checkIfUsernameExistsWorker = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Worker` WHERE `Username` = ?");
+            checkIfValidLoginClient = conn.prepareStatement("SELECT `Password` FROM `Client` WHERE `Username` = ?");
+            checkIfUsernameExistsClient = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Client` WHERE `Username` = ?");
+            		
             
 		}
 		catch (SQLException sqle) {
@@ -640,8 +647,112 @@ public class DBHelper {
     }
 	
 	//TODO:public void hashPassword(String password);
-    //TODO:public boolean checkIfValidLogin(parameters);
-	//????update rating
+    
+    //TODO:comment out print line on bad pass and bad user if not wanted
+	public boolean checkIfValidLoginWorker(String passedUsername, String passedPassword)
+	{
+		try
+		{
+			//First check if user exists
+			String receivedUsername = passedUsername.trim();
+			checkIfUsernameExistsWorker.setString(1, receivedUsername);
+			ResultSet rsCount = checkIfUsernameExistsWorker.executeQuery();
+			while(rsCount.next())
+			{
+				int count = rsCount.getInt("COUNT(`Password`)");
+				if (count == 0)
+				{
+					System.out.println("BAD USERNAME");
+					return false;
+				}
+			}
+			
+			
+			checkIfValidLoginWorker.setString(1, receivedUsername);
+			ResultSet rsPassword = checkIfValidLoginWorker.executeQuery();
+			
+			String password = null;
+			while(rsPassword.next())
+			{
+				password = rsPassword.getString("Password");
+			}
+			
+			String receivedPassword = passedPassword.trim();
+			if (password.equals(receivedPassword))
+			{
+				return true;
+			}
+			else
+			{
+				System.out.println("BAD PASSWORD");
+				return false;
+			}
+			
+	
+		}
+		catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_WORKER: " + sqle.getMessage());
+        }
+		
+		System.out.println("Username/Password issue:");
+		return false;
+		
+	}
+	
+	//TODO:comment out print line on bad pass and bad user if not wanted
+	//TODO: Trim password and usernames before setting into database
+	public boolean checkIfValidLoginClient(String passedUsername, String passedPassword)
+	{
+		try
+		{
+			//First check if user exists
+			String receivedName = passedUsername.trim();
+			checkIfUsernameExistsClient.setString(1, receivedName);
+			ResultSet rsCount = checkIfUsernameExistsClient.executeQuery();
+			while(rsCount.next())
+			{
+				int count = rsCount.getInt("COUNT(`Password`)");
+				if (count == 0)
+				{
+					System.out.println("BAD NAME");
+					return false;
+				}
+			}
+			
+			
+			checkIfValidLoginClient.setString(1, receivedName);
+			ResultSet rsPassword = checkIfValidLoginClient.executeQuery();
+			
+			String password = null;
+			while(rsPassword.next())
+			{
+				password = rsPassword.getString("Password");
+			}
+			
+			String receivedPassword = passedPassword.trim();
+			if (password.equals(receivedPassword))
+			{
+				return true;
+			}
+			else
+			{
+				System.out.println("BAD PASSWORD");
+				return false;
+			}
+			
+	
+		}
+		catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_CLIENT: " + sqle.getMessage());
+        }
+		
+		System.out.println("Username/Password issue:");
+		return false;
+		
+	}
+    //????update rating
     
     //ADDED change Transportation type
 	

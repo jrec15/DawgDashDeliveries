@@ -24,31 +24,37 @@ public class DBHelperTest extends DBHelper {
 		super.setupDelivery();
 		super.setupEstimate();
 	}
-
+	
 	@Test
 	public void test() {
 	//	fail("Not yet implemented");
 	}
-
-	public DBHelperTest() throws Exception {
+	
+	public DBHelperTest() throws Exception{
 		DBHelper helper = new DBHelper();
     	assertNotNull("prepared statement should exist", helper.addClientStatement);
     	assertNotNull("prepared statement should exist", helper.addWorkerStatement);
     	assertNotNull("prepared statement should exist", helper.setScheduleStatement);
     	assertNotNull("prepared statement should exist", helper.giveEstimateStatement);
+    	
     	assertNotNull("prepared statement should exist", helper.listClientsStatement);
     	assertNotNull("prepared statement should exist", helper.listWorkersStatement);
     	assertNotNull("prepared statement should exist", helper.listSchedulesStatement);
     	assertNotNull("prepared statement should exist", helper.listDeliveriesStatement);
     	assertNotNull("prepared statement should exist", helper.listEstimatesStatement);
+    	
     	assertNotNull("prepared statement should exist", helper.changeWorkerEmail);
     	assertNotNull("prepared statement should exist", helper.changeClientEmail);
     	assertNotNull("prepared statement should exist", helper.changeDefaultAddress);
     	assertNotNull("prepared statement should exist", helper.changeClientPassword);
     	assertNotNull("prepared statement should exist", helper.changeWorkerPassword);
+    	assertNotNull("prepared statement should exist", helper.changeWorkerTransportation);
     	assertNotNull("prepared statement should exist", helper.removeClient);
     	assertNotNull("prepared statement should exist", helper.removeWorker);
-        
+    	assertNotNull("prepared statement should exist", helper.checkIfValidLoginWorker);
+    	assertNotNull("prepared statement should exist", helper.checkIfUsernameExistsWorker);
+    	assertNotNull("prepared statement should exist", helper.checkIfValidLoginClient);
+    	assertNotNull("prepared statement should exist", helper.checkIfUsernameExistsClient);
 	}
 	
 	@Test
@@ -134,6 +140,9 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 1 username","henWinner", workerTestList.get(0).getUsername());
      	assertEquals("Worker 1 password","whatI",workerTestList.get(0).getPassword());
      	assertEquals("Worker 1 transportation", 1, workerTestList.get(0).getTransportation());
+     	assertEquals("Worker 1 Total Ratings", 0, workerTestList.get(0).getTotalRatings());
+     	assertEquals("Worker 1 Total Deliveries", 0, workerTestList.get(0).getTotalDeliveries());
+     	assertEquals("Worker 1 Pending Deliveries", 0, workerTestList.get(0).getPendingDeliveries());
      	assertEquals("Worker 1 role","worker",workerTestList.get(0).getRole());
      	
      	assertEquals("Worker 2 name","Carl",workerTestList.get(1).getName());
@@ -141,6 +150,9 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 2 username","kingEND", workerTestList.get(1).getUsername());
      	assertEquals("Worker 2 password","passcode",workerTestList.get(1).getPassword());
      	assertEquals("Worker 2 transportation", 3, workerTestList.get(1).getTransportation());
+     	assertEquals("Worker 2 Total Ratings", 0, workerTestList.get(1).getTotalRatings());
+     	assertEquals("Worker 2 Total Deliveries", 0, workerTestList.get(1).getTotalDeliveries());
+     	assertEquals("Worker 2 Pending Deliveries", 0, workerTestList.get(1).getPendingDeliveries());
      	assertEquals("Worker 2 role","admin",workerTestList.get(1).getRole());
      	
      	assertEquals("Worker 3 name","Gator",workerTestList.get(2).getName());
@@ -148,6 +160,9 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 3 username","tenFoot", workerTestList.get(2).getUsername());
      	assertEquals("Worker 3 password","tail",workerTestList.get(2).getPassword());
      	assertEquals("Worker 3 transportation", 3, workerTestList.get(2).getTransportation());
+     	assertEquals("Worker 3 Total Ratings", 0, workerTestList.get(2).getTotalRatings());
+     	assertEquals("Worker 3 Total Deliveries", 0, workerTestList.get(2).getTotalDeliveries());
+     	assertEquals("Worker 3 Pending Deliveries", 0, workerTestList.get(2).getPendingDeliveries());
      	assertEquals("Worker 3 role","worker",workerTestList.get(2).getRole());
      	
      	assertEquals("Worker 4 name","Tom",workerTestList.get(3).getName());
@@ -155,6 +170,9 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 4 username","killJerry", workerTestList.get(3).getUsername());
      	assertEquals("Worker 4 password","never",workerTestList.get(3).getPassword());
      	assertEquals("Worker 4 transportation", 2, workerTestList.get(3).getTransportation());
+     	assertEquals("Worker 4 Total Ratings", 0, workerTestList.get(3).getTotalRatings());
+     	assertEquals("Worker 4 Total Deliveries", 0, workerTestList.get(3).getTotalDeliveries());
+     	assertEquals("Worker 4 Pending Deliveries", 0, workerTestList.get(3).getPendingDeliveries());
      	assertEquals("Worker 4 role","worker",workerTestList.get(3).getRole());
      	
      	
@@ -164,4 +182,60 @@ public class DBHelperTest extends DBHelper {
      	//instance.changeWorkerTransportation(1, "Gator");
 	}
 	
+	@Test
+	public void testCheckIfValidLoginWorker() throws Exception{
+		DBHelper instance = new DBHelper();
+		
+		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
+		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
+		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
+		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
+		
+		instance.addWorker(worker1);
+		instance.addWorker(worker2);
+		instance.addWorker(worker3);
+		instance.addWorker(worker4);
+		
+		ArrayList<Worker> workerTestList= instance.getWorkerList();
+     	assertEquals("Worekrs in list",4, workerTestList.size());
+     	
+     	assertTrue("Test to see if password login is true without extra space: ", instance.checkIfValidLoginWorker("henWinner", "whatI"));
+     	assertTrue("Test to see if password login is true with extra space on password: ", instance.checkIfValidLoginWorker("henWinner", "whatI "));
+     	assertTrue("Test to see if password login is true with extra space on username: ", instance.checkIfValidLoginWorker("henWinner ", "whatI"));
+     	
+     	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLoginWorker("henWinner", ""));
+     	assertFalse("Invalid Username passed", instance.checkIfValidLoginWorker("heWinner", "whatI"));
+     	assertFalse("Invalid password passed during login", instance.checkIfValidLoginWorker("henWinner", "what"));
+     	
+	}
+	
+	@Test
+	public void testCheckIfValidLoginClient() throws Exception{
+		DBHelper instance = new DBHelper();
+	
+		Client client1 = new Client("David", "1180 White Oak Drive, Athens, GA 30606", "dseiav1@uga.edu",
+				"dss", "password");
+		Client client2 = new Client("Carrie", "1180 White Oak Drive, Athens, GA 30606", "wee12004@gmail.com",
+				"wee1", "nope");
+		Client client3 = new Client("Graphic Dude", "110 Ben Burton Parkway, Statham, GA 30666",
+				"newWorld@graphics.com", "newWorld", "ahhhh");
+		Client client4 = new Client("David S", "194 Highland Park Drive, Athens, GA 30605", "dseiav1@charter.net",
+				"dude", "yep");
+		
+		instance.addClient(client1);
+		instance.addClient(client2);
+		instance.addClient(client3);
+		instance.addClient(client4);
+		
+		ArrayList<Client> clientTestList= instance.getClientList();
+     	assertEquals("Clients in list",4, clientTestList.size());
+     	
+     	assertTrue("Test to see if password login is true without extra space: ", instance.checkIfValidLoginClient("newWorld", "ahhhh"));
+     	assertTrue("Test to see if password login is true with extra space on password: ", instance.checkIfValidLoginClient("newWorld", "ahhhh "));
+     	assertTrue("Test to see if password login is true with extra space on username: ", instance.checkIfValidLoginClient("newWorld ", "ahhhh"));
+     	
+     	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLoginClient("newWorld", ""));
+     	assertFalse("Invalid Username passed", instance.checkIfValidLoginClient("neWorld", "ahhhh"));
+     	assertFalse("Invalid password passed during login", instance.checkIfValidLoginClient("newWorld", "ahh"));
+	}
 }
