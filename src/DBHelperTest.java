@@ -1,0 +1,167 @@
+//package dawgdashdeliveries;
+
+import static org.junit.Assert.*;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import org.junit.Before;
+import org.junit.Test;
+
+
+
+public class DBHelperTest extends DBHelper {
+	
+
+	@Before
+	public void setUp() throws Exception {
+		super.setupClient();
+		super.setupWorker();
+		super.setupSchedule();
+		super.setupDelivery();
+		super.setupEstimate();
+	}
+
+	@Test
+	public void test() {
+	//	fail("Not yet implemented");
+	}
+
+	public DBHelperTest() throws Exception {
+		DBHelper helper = new DBHelper();
+    	assertNotNull("prepared statement should exist", helper.addClientStatement);
+    	assertNotNull("prepared statement should exist", helper.addWorkerStatement);
+    	assertNotNull("prepared statement should exist", helper.setScheduleStatement);
+    	assertNotNull("prepared statement should exist", helper.giveEstimateStatement);
+    	assertNotNull("prepared statement should exist", helper.listClientsStatement);
+    	assertNotNull("prepared statement should exist", helper.listWorkersStatement);
+    	assertNotNull("prepared statement should exist", helper.listSchedulesStatement);
+    	assertNotNull("prepared statement should exist", helper.listDeliveriesStatement);
+    	assertNotNull("prepared statement should exist", helper.listEstimatesStatement);
+    	assertNotNull("prepared statement should exist", helper.changeWorkerEmail);
+    	assertNotNull("prepared statement should exist", helper.changeClientEmail);
+    	assertNotNull("prepared statement should exist", helper.changeDefaultAddress);
+    	assertNotNull("prepared statement should exist", helper.changeClientPassword);
+    	assertNotNull("prepared statement should exist", helper.changeWorkerPassword);
+    	assertNotNull("prepared statement should exist", helper.removeClient);
+    	assertNotNull("prepared statement should exist", helper.removeWorker);
+        
+	}
+	
+	@Test
+	public void testAddClient() throws Exception{
+		DBHelper instance = new DBHelper();
+		
+		Client client1 = new Client("David", "1180 White Oak Drive, Athens, GA 30606", "dseiav1@uga.edu",
+				"dss", "password");
+		Client client2 = new Client("Carrie", "1180 White Oak Drive, Athens, GA 30606", "wee12004@gmail.com",
+				"wee1", "nope");
+		Client client3 = new Client("Graphic Dude", "110 Ben Burton Parkway, Statham, GA 30666",
+				"newWorld@graphics.com", "newWorld", "ahhhh");
+		Client client4 = new Client("David S", "194 Highland Park Drive, Athens, GA 30605", "dseiav1@charter.net",
+				"dude", "yep");
+		
+		instance.addClient(client1);
+		instance.addClient(client2);
+		instance.addClient(client3);
+		instance.addClient(client4);
+		
+		ArrayList<Client> clientTestList= instance.getClientList();
+     	assertEquals("Clients in list",4, clientTestList.size());
+     	
+     	assertEquals("Client 1 name","David",clientTestList.get(0).getName());
+     	assertEquals("Client 1 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(0).getDefaultAddress());
+     	assertEquals("Client 1 email","dseiav1@uga.edu",clientTestList.get(0).getEmail());
+     	assertEquals("Client 1 username","dss",clientTestList.get(0).getUsername());
+     	assertEquals("Client 1 password","password",clientTestList.get(0).getPassword());
+     	
+     	assertEquals("Client 2 name","Carrie",clientTestList.get(1).getName());
+     	assertEquals("Client 2 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(1).getDefaultAddress());
+     	assertEquals("Client 2 email","wee12004@gmail.com",clientTestList.get(1).getEmail());
+     	assertEquals("Client 2 username","wee1",clientTestList.get(1).getUsername());
+     	assertEquals("Client 2 password","nope",clientTestList.get(1).getPassword());
+     	
+     	assertEquals("Client 3 name","Graphic Dude",clientTestList.get(2).getName());
+     	assertEquals("Client 3 address","110 Ben Burton Parkway, Statham, GA 30666",clientTestList.get(2).getDefaultAddress());
+     	assertEquals("Client 3 email","newWorld@graphics.com",clientTestList.get(2).getEmail());
+     	assertEquals("Client 3 username","newWorld",clientTestList.get(2).getUsername());
+     	assertEquals("Client 3 password","ahhhh",clientTestList.get(2).getPassword());
+     	
+     	assertEquals("Client 4 name","David S",clientTestList.get(3).getName());
+     	assertEquals("Client 4 address","194 Highland Park Drive, Athens, GA 30605",clientTestList.get(3).getDefaultAddress());
+     	assertEquals("Client 4 email","dseiav1@charter.net",clientTestList.get(3).getEmail());
+     	assertEquals("Client 4 username","dude",clientTestList.get(3).getUsername());
+     	assertEquals("Client 4 password","yep",clientTestList.get(3).getPassword());
+     	
+     	//Test Change of Password, looking to see if it chooses only the first one it finds(changes both)
+     	/** Cannot do this at this time, async, instead of sync
+     	instance.changeClientPassword("helloKitty", "David");
+     	assertEquals("Client 1 name","David",clientTestList.get(0).getName());
+     	assertEquals("Client 1 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(0).getDefaultAddress());
+     	assertEquals("Client 1 email","dseiav1@uga.edu",clientTestList.get(0).getEmail());
+     	assertEquals("Client 1 username","dss",clientTestList.get(0).getUsername());
+     	assertEquals("Client 1 password","helloKitty",clientTestList.get(0).getPassword());
+     	 */
+     	//HardTests
+     	//instance.changeClientPassword("helloKitty", "David");
+     	//instance.changeClientEmail("thisIsNew@gmail.com", "Graphic Dude");
+	
+	}
+	
+	
+	@Test
+	public void testAddWorker() throws Exception{
+		DBHelper instance = new DBHelper();
+		
+		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
+		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
+		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
+		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
+		
+		instance.addWorker(worker1);
+		instance.addWorker(worker2);
+		instance.addWorker(worker3);
+		instance.addWorker(worker4);
+		
+		ArrayList<Worker> workerTestList= instance.getWorkerList();
+     	assertEquals("Worekrs in list",4, workerTestList.size());
+     	
+     	assertEquals("Worker 1 name","Henry",workerTestList.get(0).getName());
+     	assertEquals("Worker 1 email","hen@yahoo.com",workerTestList.get(0).getEmail());
+     	assertEquals("Worker 1 username","henWinner", workerTestList.get(0).getUsername());
+     	assertEquals("Worker 1 password","whatI",workerTestList.get(0).getPassword());
+     	assertEquals("Worker 1 transportation", 1, workerTestList.get(0).getTransportation());
+     	assertEquals("Worker 1 role","worker",workerTestList.get(0).getRole());
+     	
+     	assertEquals("Worker 2 name","Carl",workerTestList.get(1).getName());
+     	assertEquals("Worker 2 email","carl@dawgdashdeliveries.com",workerTestList.get(1).getEmail());
+     	assertEquals("Worker 2 username","kingEND", workerTestList.get(1).getUsername());
+     	assertEquals("Worker 2 password","passcode",workerTestList.get(1).getPassword());
+     	assertEquals("Worker 2 transportation", 3, workerTestList.get(1).getTransportation());
+     	assertEquals("Worker 2 role","admin",workerTestList.get(1).getRole());
+     	
+     	assertEquals("Worker 3 name","Gator",workerTestList.get(2).getName());
+     	assertEquals("Worker 3 email","inDA@swamp.net",workerTestList.get(2).getEmail());
+     	assertEquals("Worker 3 username","tenFoot", workerTestList.get(2).getUsername());
+     	assertEquals("Worker 3 password","tail",workerTestList.get(2).getPassword());
+     	assertEquals("Worker 3 transportation", 3, workerTestList.get(2).getTransportation());
+     	assertEquals("Worker 3 role","worker",workerTestList.get(2).getRole());
+     	
+     	assertEquals("Worker 4 name","Tom",workerTestList.get(3).getName());
+     	assertEquals("Worker 4 email","tom@gmail.com",workerTestList.get(3).getEmail());
+     	assertEquals("Worker 4 username","killJerry", workerTestList.get(3).getUsername());
+     	assertEquals("Worker 4 password","never",workerTestList.get(3).getPassword());
+     	assertEquals("Worker 4 transportation", 2, workerTestList.get(3).getTransportation());
+     	assertEquals("Worker 4 role","worker",workerTestList.get(3).getRole());
+     	
+     	
+     	//HardTests
+     	//instance.changeWorkerPassword("helloNewPassword", "Tom");
+     	//instance.changeWorkerEmail("golden@gmail.com", "Gator");
+     	//instance.changeWorkerTransportation(1, "Gator");
+	}
+	
+}

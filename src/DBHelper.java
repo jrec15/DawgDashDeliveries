@@ -1,3 +1,5 @@
+//package dawgdashdeliveries;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,38 +14,65 @@ public class DBHelper {
 	protected PreparedStatement addWorkerStatement;
 	protected PreparedStatement setScheduleStatement;
 	protected PreparedStatement giveEstimateStatement;
-	protected PreparedStatement listClientsStatement;
+	
+    protected PreparedStatement listClientsStatement;
 	protected PreparedStatement listWorkersStatement;
 	protected PreparedStatement listSchedulesStatement;
 	protected PreparedStatement listDeliveriesStatement;
 	protected PreparedStatement listEstimatesStatement;
-	
+    
+    protected PreparedStatement changeWorkerEmail;
+	protected PreparedStatement changeClientEmail;
+	protected PreparedStatement changeDefaultAddress;
+    protected PreparedStatement changeClientPassword;
+    protected PreparedStatement changeWorkerPassword;
+    protected PreparedStatement changeWorkerTransportation;
+    protected PreparedStatement removeClient;
+    protected PreparedStatement removeWorker;
+    
+
 	public DBHelper() throws Exception {
 		//Might need to change to match your info
+		
 		String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 		String DB_USER = "root";
 		String DB_PASS = "";
+		//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
+		//String DB_USER = "athena";
+		//String DB_PASS = "wisdomgoddess";
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
 			//add prepared statements here
 			addClientStatement = conn.prepareStatement("INSERT INTO Client (Name, `Default "
 					+ "Address`, Email, Username, Password) VALUES (?, ?, ?, ?, ?)");
-			addWorkerStatement = conn.prepareStatement("INSERT INTO Worker (Name, Email,"
-					+ "Password, Transportation, Rating, `Total Ratings`, `Total Deliveries`"
-					+ "`Pending Deliveries`, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			addWorkerStatement = conn.prepareStatement("INSERT INTO Worker (Name, Email, Username, "
+					+ "Password, Transportation, Rating, `Total Ratings`, `Total Deliveries`,"
+					+ "`Pending Deliveries`, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			setScheduleStatement = conn.prepareStatement("INSERT INTO Schedule (`Worker ID`, Sunday, "
 					+ "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			giveEstimateStatement = conn.prepareStatement("INSERT INTO Estimate (`Client ID`, Duration, "
 					+ "Price, Transportation, `Source Address`, `Destination Address`) VALUES (?, ?, ?, ?, ?, ?)");
-			listClientsStatement = conn.prepareStatement("select ID, Name, DefaultAddress, Email, Username, Password from Client");
+			
+            listClientsStatement = conn.prepareStatement("select ID, Name, `Default Address`, Email, Username, Password from Client");
 			listWorkersStatement = conn.prepareStatement("select ID, Name, Email, Username, Password, Transportation, Rating, "
-					+ "TotalRatings, TotalDeliveries, PendingDeliveries, Role from Worker");
-			listSchedulesStatement = conn.prepareStatement("select WorkerID, Sunday, Monday, Tuesday, Wednesday, Thursday, "
+					+ "`Total Ratings`, `Total Deliveries`, `Pending Deliveries`, Role from Worker");
+			listSchedulesStatement = conn.prepareStatement("select `Worker ID`, Sunday, Monday, Tuesday, Wednesday, Thursday, "
 					+ "Friday, Saturday from Schedule");
-			listDeliveriesStatement = conn.prepareStatement("select ID, EstimateID, WorkerID, DeliveryStatus, PaymentStatus, "
-					+ "Rating, WorkerComment, ClientComment, TimeCompleted from Delivery");
-			listEstimatesStatement = conn.prepareStatement("select ClientID, Duration, Price, Transportation, SourceAddress, DestinationAddress from Estimate");
+			listDeliveriesStatement = conn.prepareStatement("select ID, `Estimate ID`, `Worker ID`, `Delivery Status`, `Payment Status`, "
+					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed` from Delivery");
+			listEstimatesStatement = conn.prepareStatement("select `Client ID`, Duration, Price, Transportation, `Source Address`, `Destination Address` from Estimate");
+            
+            changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `Name` = ?");
+            changeWorkerEmail = conn.prepareStatement("UPDATE `Worker` SET `Email` = ? WHERE `Name` = ?");
+            changeWorkerTransportation = conn.prepareStatement("UPDATE `Worker` SET `Transportation` = ? WHERE `Name` = ?");
+            changeDefaultAddress = conn.prepareStatement("UPDATE `Client` SET `Default Address` = ? WHERE `Name` = ?");
+            changeClientPassword = conn.prepareStatement("UPDATE `Client` SET `Password` = ? WHERE `Name` = ?");
+            changeWorkerPassword = conn.prepareStatement("UPDATE `Worker` SET `Password` = ? WHERE `Name` = ?");
+            removeClient = conn.prepareStatement("DELETE FROM `Client` WHERE `Name` = ?");
+            removeWorker = conn.prepareStatement("DELETE FROM `Worker` WHERE `Name` = ?");
+            
+            
 		}
 		catch (SQLException sqle) {
 			System.out.println("Exception in Constructor:" + sqle.getMessage());
@@ -56,13 +85,14 @@ public class DBHelper {
 	 */
 	public ArrayList<Client> getClientList(){
 		ArrayList<Client> list = new ArrayList<Client>();
+		
 		try{
 			ResultSet rs = listClientsStatement.executeQuery();
 			while(rs.next()){
 				//package the current record as a Client object
 				int id = rs.getInt("ID");
 				String name = rs.getString("Name");
-				String defaddress = rs.getString("DefaultAddress");
+				String defaddress = rs.getString("Default Address");
 				String email = rs.getString("Email");
 				String username = rs.getString("Username");
 				String password = rs.getString("Password");
@@ -92,9 +122,9 @@ public class DBHelper {
 				String password = rs.getString("Password");
 				int transportation = rs.getInt("Transportation");
 				int rating = rs.getInt("Rating");
-				int totalRating = rs.getInt("TotalRatings");
-				int totalDeliveries = rs.getInt("TotalDeliveries");
-				int pendingDeliveries = rs.getInt("PendingDeliveries");
+				int totalRating = rs.getInt("Total Ratings");
+				int totalDeliveries = rs.getInt("Total Deliveries");
+				int pendingDeliveries = rs.getInt("Pending Deliveries");
 				String role = rs.getString("Role");
 				Worker worker = new Worker(id, name, email, username, password, transportation, rating, totalRating, 
 						totalDeliveries, pendingDeliveries, role);
@@ -332,13 +362,14 @@ public class DBHelper {
 			try {
 				addWorkerStatement.setString(1, worker.getName());
 				addWorkerStatement.setString(2, worker.getEmail());
-				addWorkerStatement.setString(3, worker.getPassword());
-				addWorkerStatement.setInt(4, worker.getTransportation());
-				addWorkerStatement.setInt(5, worker.getRating());
-				addWorkerStatement.setInt(6, worker.getTotalRatings());
-				addWorkerStatement.setInt(7, worker.getTotalDeliveries());
-				addWorkerStatement.setInt(8, worker.getPendingDeliveries());
-				addWorkerStatement.setString(9, worker.getRole());
+				addWorkerStatement.setString(3,  worker.getUsername());
+				addWorkerStatement.setString(4, worker.getPassword());
+				addWorkerStatement.setInt(5, worker.getTransportation());
+				addWorkerStatement.setInt(6, worker.getRating());
+				addWorkerStatement.setInt(7, worker.getTotalRatings());
+				addWorkerStatement.setInt(8, worker.getTotalDeliveries());
+				addWorkerStatement.setInt(9, worker.getPendingDeliveries());
+				addWorkerStatement.setString(10, worker.getRole());
 				addWorkerStatement.executeUpdate();
 			}
 			catch (SQLException sqle){
@@ -379,10 +410,13 @@ public class DBHelper {
 			}
 		}
 		
-		public void setupClient() {
+		public void setupClient() throws Exception{
 			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 			String DB_USER = "root";
 			String DB_PASS = "";
+			//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
+			//String DB_USER = "athena";
+			//String DB_PASS = "wisdomgoddess";
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
@@ -397,10 +431,13 @@ public class DBHelper {
 		}
 		
 		
-		public void setupWorker() {
+		public void setupWorker() throws Exception{
 			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 			String DB_USER = "root";
 			String DB_PASS = "";
+			//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
+			//String DB_USER = "athena";
+			//String DB_PASS = "wisdomgoddess";
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
@@ -414,10 +451,13 @@ public class DBHelper {
 			}
 		}
 		
-		public void setupSchedule() {
+		public void setupSchedule() throws Exception{
 			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 			String DB_USER = "root";
 			String DB_PASS = "";
+			//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
+			//String DB_USER = "athena";
+			//String DB_PASS = "wisdomgoddess";
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
@@ -431,10 +471,13 @@ public class DBHelper {
 			}
 		}
 		
-		public void setupEstimate() {
+		public void setupEstimate() throws Exception{
 			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 			String DB_USER = "root";
 			String DB_PASS = "";
+			//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
+			//String DB_USER = "athena";
+			//String DB_PASS = "wisdomgoddess";
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
@@ -448,10 +491,13 @@ public class DBHelper {
 			}
 		}
 		
-		public void setupDelivery() {
+		public void setupDelivery() throws Exception{
 			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 			String DB_USER = "root";
 			String DB_PASS = "";
+			//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
+			//String DB_USER = "athena";
+			//String DB_PASS = "wisdomgoddess";
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
@@ -466,21 +512,138 @@ public class DBHelper {
 		}
 	
 	//end justin
-	//David Seivitch
-	public boolean checkIfValidLogin(parameters); 
 	
-	public void changePassword(parameters);
+    
+    //David Seivitch
 	
-	public void changeEmail(parameters);
+	//TODO: Need to add checking to make sure this is legal (compare old to a passed in on if we want)
+	//I want to throw an exception and add a parameter for passedOldPassword
+	public void changeClientPassword(String passedPassword, String passedName)
+    {
+       
+        try
+        {
+            changeClientPassword.setString(1, passedPassword);
+            changeClientPassword.setString(2, passedName);
+            changeClientPassword.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHANGE CLIENT_PASSWORD: " + sqle.getMessage());
+        }
+            
+    }
 	
-	public void changeAddress(parameters);
+    //TODO: Need to add checking to make sure this is legal (compare old to a passed in on if we want)
+    //I want to throw an exception and add a parameter for passedOldPassword
+    public void changeWorkerPassword(String passedPassword, String passedName)
+    {
+       
+        try
+        {
+            changeWorkerPassword.setString(1, passedPassword);
+            changeWorkerPassword.setString(2, passedName);
+            changeWorkerPassword.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHANGE WORKER_PASSWORD: " + sqle.getMessage());
+        }
+            
+    }
+    
+    public void changeClientEmail(String passedEmail, String passedName)
+    {
+        try
+        {
+        	changeClientEmail.setString(1, passedEmail);
+            changeClientEmail.setString(2, passedName);
+            changeClientEmail.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHANGE CLIENT_EMAIL: " + sqle.getMessage());
+        }
+    }
+    
+    public void changeWorkerEmail(String passedEmail, String passedName)
+    {
+        try
+        {
+        	changeWorkerEmail.setString(1, passedEmail);
+            changeWorkerEmail.setString(2, passedName);
+            changeWorkerEmail.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHANGE WORKER_EMAIL: " + sqle.getMessage());
+        }
+    }
+    
+    public void changeWorkerTransportation(int passedINT, String passedName)
+    {
+        try
+        {
+        	changeWorkerTransportation.setInt(1, passedINT);
+            changeWorkerTransportation.setString(2, passedName);
+            changeWorkerTransportation.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHANGE WORKER_TRANSPORTATION: " + sqle.getMessage());
+        }
+    }
+    
+    public void changeDefaultAddress(String passedAddress, String passedName)
+    {
+        
+        try
+        {
+            changeDefaultAddress.setString(1, passedAddress);
+            changeDefaultAddress.setString(2, passedName);
+            changeDefaultAddress.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHANGE DEFAULT_ADDRESS: " + sqle.getMessage());
+        }
+    }
 	
-	public void removeClient(clientID);
+    //TODO: Might be a bad idea, as we would lose archive information, might want to do somthing with the entity
+    public void removeClient(String passedName)
+    {
+        
+        try
+        {
+            removeClient.setString(1,passedName);
+            removeClient.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN DELETE CLIENT: " + sqle.getMessage());
+        }
+    }
 	
-	public void removeWorker(workerID);
+    //TODO: Might be a bad idea, as we would lose archive information, might want to do somthing with the entity
+    public void removeWorker(String passedName)
+    {
+        
+        try
+        {
+        	removeWorker.setString(1,passedName);
+            removeWorker.executeUpdate();
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN DELETE WORKER: " + sqle.getMessage());
+        }
+    }
 	
-	public void hashPassword(String password);
-	
+	//TODO:public void hashPassword(String password);
+    //TODO:public boolean checkIfValidLogin(parameters);
+	//????update rating
+    
+    //ADDED change Transportation type
 	
 	
 }
