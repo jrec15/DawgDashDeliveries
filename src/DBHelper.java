@@ -1,5 +1,8 @@
 //package dawgdashdeliveries;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -37,7 +40,7 @@ public class DBHelper {
 	public DBHelper() throws Exception {
 		//Might need to change to match your info
 		
-        String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
+		String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 		String DB_USER = "root";
 		String DB_PASS = "";
 		//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
@@ -66,14 +69,14 @@ public class DBHelper {
 					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed` from Delivery");
 			listEstimatesStatement = conn.prepareStatement("select `Client ID`, Duration, Price, Transportation, `Source Address`, `Destination Address` from Estimate");
             
-            changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `Name` = ?");
-            changeWorkerEmail = conn.prepareStatement("UPDATE `Worker` SET `Email` = ? WHERE `Name` = ?");
-            changeWorkerTransportation = conn.prepareStatement("UPDATE `Worker` SET `Transportation` = ? WHERE `Name` = ?");
-            changeDefaultAddress = conn.prepareStatement("UPDATE `Client` SET `Default Address` = ? WHERE `Name` = ?");
-            changeClientPassword = conn.prepareStatement("UPDATE `Client` SET `Password` = ? WHERE `Name` = ?");
-            changeWorkerPassword = conn.prepareStatement("UPDATE `Worker` SET `Password` = ? WHERE `Name` = ?");
-            removeClient = conn.prepareStatement("DELETE FROM `Client` WHERE `Name` = ?");
-            removeWorker = conn.prepareStatement("DELETE FROM `Worker` WHERE `Name` = ?");
+            changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `Username` = ?");
+            changeWorkerEmail = conn.prepareStatement("UPDATE `Worker` SET `Email` = ? WHERE `Username` = ?");
+            changeWorkerTransportation = conn.prepareStatement("UPDATE `Worker` SET `Transportation` = ? WHERE `Username` = ?");
+            changeDefaultAddress = conn.prepareStatement("UPDATE `Client` SET `Default Address` = ? WHERE `Username` = ?");
+            changeClientPassword = conn.prepareStatement("UPDATE `Client` SET `Password` = ? WHERE `Username` = ?");
+            changeWorkerPassword = conn.prepareStatement("UPDATE `Worker` SET `Password` = ? WHERE `Username` = ?");
+            removeClient = conn.prepareStatement("DELETE FROM `Client` WHERE `Username` = ?");
+            removeWorker = conn.prepareStatement("DELETE FROM `Worker` WHERE `Username` = ?");
             checkIfValidLoginWorker = conn.prepareStatement("SELECT `Password` FROM `Worker` WHERE `Username` = ?");
             checkIfUsernameExistsWorker = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Worker` WHERE `Username` = ?");
             checkIfValidLoginClient = conn.prepareStatement("SELECT `Password` FROM `Client` WHERE `Username` = ?");
@@ -350,27 +353,35 @@ public class DBHelper {
 	//
 	
 	//justin
-		public void addClient(Client client) {
+		public void addClient(Client client) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 			try {
 				addClientStatement.setString(1, client.getName());
 				addClientStatement.setString(2, client.getDefaultAddress());
 				addClientStatement.setString(3, client.getEmail());
 				addClientStatement.setString(4, client.getUsername());
-				addClientStatement.setString(5, client.getPassword());
+				addClientStatement.setString(5, hashPassword(client.getPassword()));
 				addClientStatement.executeUpdate();
 			}
 			catch (SQLException sqle){
 				System.out.println("Exception in addClient:" + sqle.getMessage());
 			}
+			catch (NoSuchAlgorithmException e)
+			{
+				System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+			}
 		}
 		
-		//Note** We forgot username here
-		public void addWorker(Worker worker) {
+		
+		public void addWorker(Worker worker) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 			try {
 				addWorkerStatement.setString(1, worker.getName());
 				addWorkerStatement.setString(2, worker.getEmail());
 				addWorkerStatement.setString(3,  worker.getUsername());
-				addWorkerStatement.setString(4, worker.getPassword());
+				addWorkerStatement.setString(4, hashPassword(worker.getPassword()));
 				addWorkerStatement.setInt(5, worker.getTransportation());
 				addWorkerStatement.setInt(6, worker.getRating());
 				addWorkerStatement.setInt(7, worker.getTotalRatings());
@@ -381,6 +392,14 @@ public class DBHelper {
 			}
 			catch (SQLException sqle){
 				System.out.println("Exception in addWorker:" + sqle.getMessage());
+			}
+			catch (NoSuchAlgorithmException e)
+			{
+				System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
 			}
 		}
 		
@@ -523,48 +542,80 @@ public class DBHelper {
     
     //David Seivitch
 	
-	//TODO: Need to add checking to make sure this is legal (compare old to a passed in on if we want)
-	//I want to throw an exception and add a parameter for passedOldPassword
-	public void changeClientPassword(String passedPassword, String passedName)
+	//TODO: If false what do you want to do
+	public void changeClientPassword(String passedUsername, String passedExistingPassword, String passedNewPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
     {
        
         try
         {
-            changeClientPassword.setString(1, passedPassword);
-            changeClientPassword.setString(2, passedName);
-            changeClientPassword.executeUpdate();
+            //Don't hash existing password as it is done in checkIfValidLoginClient
+        	if (checkIfValidLoginClient(passedUsername, passedExistingPassword ))
+            {
+            	changeClientPassword.setString(1, hashPassword(passedNewPassword));
+            	changeClientPassword.setString(2, passedUsername);
+            	changeClientPassword.executeUpdate();
+        
+            }
+            else
+            {
+            	System.out.println("Invalid Existing Password");
+            }
+            
         }
         catch (SQLException sqle)
         {
             System.out.println("ERROR IN CHANGE CLIENT_PASSWORD: " + sqle.getMessage());
         }
+        catch (NoSuchAlgorithmException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+		}
             
     }
 	
-    //TODO: Need to add checking to make sure this is legal (compare old to a passed in on if we want)
-    //I want to throw an exception and add a parameter for passedOldPassword
-    public void changeWorkerPassword(String passedPassword, String passedName)
+    //TODO: If false what do you want to do
+    public void changeWorkerPassword(String passedUsername, String passedExistingPassword, String passedNewPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
     {
        
         try
         {
-            changeWorkerPassword.setString(1, passedPassword);
-            changeWorkerPassword.setString(2, passedName);
-            changeWorkerPassword.executeUpdate();
+        	//Don't hash existing password as it is done in checkIfValidLoginClient
+        	if(checkIfValidLoginWorker(passedUsername, passedExistingPassword))
+            {
+            	changeWorkerPassword.setString(1, hashPassword(passedNewPassword));
+            	changeWorkerPassword.setString(2, passedUsername);
+            	changeWorkerPassword.executeUpdate();
+            }
+            else
+            {
+            	System.out.println("Invalid Existing Password");
+            }
         }
         catch (SQLException sqle)
         {
             System.out.println("ERROR IN CHANGE WORKER_PASSWORD: " + sqle.getMessage());
         }
+        catch (NoSuchAlgorithmException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+		}
             
     }
     
-    public void changeClientEmail(String passedEmail, String passedName)
+    public void changeClientEmail(String passedEmail, String passedUsername)
     {
         try
         {
         	changeClientEmail.setString(1, passedEmail);
-            changeClientEmail.setString(2, passedName);
+            changeClientEmail.setString(2, passedUsername);
             changeClientEmail.executeUpdate();
         }
         catch (SQLException sqle)
@@ -573,12 +624,12 @@ public class DBHelper {
         }
     }
     
-    public void changeWorkerEmail(String passedEmail, String passedName)
+    public void changeWorkerEmail(String passedEmail, String passedUsername)
     {
         try
         {
         	changeWorkerEmail.setString(1, passedEmail);
-            changeWorkerEmail.setString(2, passedName);
+            changeWorkerEmail.setString(2, passedUsername);
             changeWorkerEmail.executeUpdate();
         }
         catch (SQLException sqle)
@@ -587,12 +638,12 @@ public class DBHelper {
         }
     }
     
-    public void changeWorkerTransportation(int passedINT, String passedName)
+    public void changeWorkerTransportation(int passedINT, String passedUsername)
     {
         try
         {
         	changeWorkerTransportation.setInt(1, passedINT);
-            changeWorkerTransportation.setString(2, passedName);
+            changeWorkerTransportation.setString(2, passedUsername);
             changeWorkerTransportation.executeUpdate();
         }
         catch (SQLException sqle)
@@ -601,13 +652,13 @@ public class DBHelper {
         }
     }
     
-    public void changeDefaultAddress(String passedAddress, String passedName)
+    public void changeDefaultAddress(String passedAddress, String passedUsername)
     {
         
         try
         {
             changeDefaultAddress.setString(1, passedAddress);
-            changeDefaultAddress.setString(2, passedName);
+            changeDefaultAddress.setString(2, passedUsername);
             changeDefaultAddress.executeUpdate();
         }
         catch (SQLException sqle)
@@ -617,12 +668,12 @@ public class DBHelper {
     }
 	
     //TODO: Might be a bad idea, as we would lose archive information, might want to do somthing with the entity
-    public void removeClient(String passedName)
+    public void removeClient(String passedUsername)
     {
         
         try
         {
-            removeClient.setString(1,passedName);
+            removeClient.setString(1,passedUsername);
             removeClient.executeUpdate();
         }
         catch (SQLException sqle)
@@ -632,12 +683,12 @@ public class DBHelper {
     }
 	
     //TODO: Might be a bad idea, as we would lose archive information, might want to do somthing with the entity
-    public void removeWorker(String passedName)
+    public void removeWorker(String passedUsername)
     {
         
         try
         {
-        	removeWorker.setString(1,passedName);
+        	removeWorker.setString(1,passedUsername);
             removeWorker.executeUpdate();
         }
         catch (SQLException sqle)
@@ -646,10 +697,47 @@ public class DBHelper {
         }
     }
 	
-	//TODO:public void hashPassword(String password);
+    //Returns a hashed password in string format
+	public String hashPassword(String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException{
+		
+		String hash = passedPassword;
+		
+		try
+		{
+			//Sets the algorithm for conversion
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			//Sets the digested hash into the byte array using UTF-8 coding to convert into byte type 
+			byte byteData[] = md.digest(hash.getBytes("UTF-8"));
+			
+			//Future holder of hex type hashed password
+			StringBuilder sb = new StringBuilder();
+		    
+		    // Appends each byte code read from byteArray to sb after byte is converted into hex type 
+			// %02x describes the formating type used for conversion for hex
+			for(int i = 0; i < byteData.length; i++)
+			{
+				sb.append(String.format("%02x", byteData[i]));
+			}
+			//Sets hash to string literal
+			hash = sb.toString();
+			
+			//Used to set test cases
+			//System.out.println("Passed in "+ passedPassword +" returned after hash "+ hash);
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+		}
+		return hash;
+		
+	}
+	
     
-    //TODO:comment out print line on bad pass and bad user if not wanted
-	public boolean checkIfValidLoginWorker(String passedUsername, String passedPassword)
+	public boolean checkIfValidLoginWorker(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
 	{
 		try
 		{
@@ -677,7 +765,7 @@ public class DBHelper {
 				password = rsPassword.getString("Password");
 			}
 			
-			String receivedPassword = passedPassword.trim();
+			String receivedPassword = hashPassword(passedPassword.trim());
 			if (password.equals(receivedPassword))
 			{
 				return true;
@@ -694,15 +782,23 @@ public class DBHelper {
         {
             System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_WORKER: " + sqle.getMessage());
         }
+		catch (NoSuchAlgorithmException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+		}
 		
-		System.out.println("Username/Password issue:");
+		System.out.println("Username/Password Invaild:");
 		return false;
 		
 	}
 	
-	//TODO:comment out print line on bad pass and bad user if not wanted
-	//TODO: Trim password and usernames before setting into database
-	public boolean checkIfValidLoginClient(String passedUsername, String passedPassword)
+	
+	//Trim password and Username before setting into database
+	public boolean checkIfValidLoginClient(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
 	{
 		try
 		{
@@ -723,14 +819,14 @@ public class DBHelper {
 			
 			checkIfValidLoginClient.setString(1, receivedName);
 			ResultSet rsPassword = checkIfValidLoginClient.executeQuery();
-			
 			String password = null;
+			
 			while(rsPassword.next())
 			{
 				password = rsPassword.getString("Password");
 			}
 			
-			String receivedPassword = passedPassword.trim();
+			String receivedPassword = hashPassword(passedPassword.trim());
 			if (password.equals(receivedPassword))
 			{
 				return true;
@@ -747,14 +843,22 @@ public class DBHelper {
         {
             System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_CLIENT: " + sqle.getMessage());
         }
+		catch (NoSuchAlgorithmException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+		}
 		
-		System.out.println("Username/Password issue:");
+		System.out.println("Username/Password Invalid:");
 		return false;
 		
 	}
-    //????update rating
+    //TODO: update rating not here, just question
     
-    //ADDED change Transportation type
+    
 	
 	
 }

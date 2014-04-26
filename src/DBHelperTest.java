@@ -1,11 +1,6 @@
 //package dawgdashdeliveries;
 
 import static org.junit.Assert.*;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.junit.Before;
@@ -82,25 +77,25 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Client 1 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(0).getDefaultAddress());
      	assertEquals("Client 1 email","dseiav1@uga.edu",clientTestList.get(0).getEmail());
      	assertEquals("Client 1 username","dss",clientTestList.get(0).getUsername());
-     	assertEquals("Client 1 password","password",clientTestList.get(0).getPassword());
+     	assertEquals("Client 1 password","5f4dcc3b5aa765d61d8327deb882cf99",clientTestList.get(0).getPassword());
      	
      	assertEquals("Client 2 name","Carrie",clientTestList.get(1).getName());
      	assertEquals("Client 2 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(1).getDefaultAddress());
      	assertEquals("Client 2 email","wee12004@gmail.com",clientTestList.get(1).getEmail());
      	assertEquals("Client 2 username","wee1",clientTestList.get(1).getUsername());
-     	assertEquals("Client 2 password","nope",clientTestList.get(1).getPassword());
+     	assertEquals("Client 2 password","4101bef8794fed986e95dfb54850c68b",clientTestList.get(1).getPassword());
      	
      	assertEquals("Client 3 name","Graphic Dude",clientTestList.get(2).getName());
      	assertEquals("Client 3 address","110 Ben Burton Parkway, Statham, GA 30666",clientTestList.get(2).getDefaultAddress());
      	assertEquals("Client 3 email","newWorld@graphics.com",clientTestList.get(2).getEmail());
      	assertEquals("Client 3 username","newWorld",clientTestList.get(2).getUsername());
-     	assertEquals("Client 3 password","ahhhh",clientTestList.get(2).getPassword());
+     	assertEquals("Client 3 password","82dfb76426e6e317209202b31056b07a",clientTestList.get(2).getPassword());
      	
      	assertEquals("Client 4 name","David S",clientTestList.get(3).getName());
      	assertEquals("Client 4 address","194 Highland Park Drive, Athens, GA 30605",clientTestList.get(3).getDefaultAddress());
      	assertEquals("Client 4 email","dseiav1@charter.net",clientTestList.get(3).getEmail());
      	assertEquals("Client 4 username","dude",clientTestList.get(3).getUsername());
-     	assertEquals("Client 4 password","yep",clientTestList.get(3).getPassword());
+     	assertEquals("Client 4 password","9348ae7851cf3ba798d9564ef308ec25",clientTestList.get(3).getPassword());
      	
      	//Test Change of Password, looking to see if it chooses only the first one it finds(changes both)
      	/** Cannot do this at this time, async, instead of sync
@@ -112,7 +107,8 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Client 1 password","helloKitty",clientTestList.get(0).getPassword());
      	 */
      	//HardTests
-     	//instance.changeClientPassword("helloKitty", "David");
+     	//instance.changeClientPassword("dss", "password", "hellokittY" );
+     	//assertEquals("Client 1 reset password","hellokittY",clientTestList.get(0).getPassword());
      	//instance.changeClientEmail("thisIsNew@gmail.com", "Graphic Dude");
 	
 	}
@@ -138,7 +134,7 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 1 name","Henry",workerTestList.get(0).getName());
      	assertEquals("Worker 1 email","hen@yahoo.com",workerTestList.get(0).getEmail());
      	assertEquals("Worker 1 username","henWinner", workerTestList.get(0).getUsername());
-     	assertEquals("Worker 1 password","whatI",workerTestList.get(0).getPassword());
+     	assertEquals("Worker 1 password","64fa8bc9aa638036e9a09bb1bd4da2ad",workerTestList.get(0).getPassword());
      	assertEquals("Worker 1 transportation", 1, workerTestList.get(0).getTransportation());
      	assertEquals("Worker 1 Total Ratings", 0, workerTestList.get(0).getTotalRatings());
      	assertEquals("Worker 1 Total Deliveries", 0, workerTestList.get(0).getTotalDeliveries());
@@ -148,7 +144,7 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 2 name","Carl",workerTestList.get(1).getName());
      	assertEquals("Worker 2 email","carl@dawgdashdeliveries.com",workerTestList.get(1).getEmail());
      	assertEquals("Worker 2 username","kingEND", workerTestList.get(1).getUsername());
-     	assertEquals("Worker 2 password","passcode",workerTestList.get(1).getPassword());
+     	assertEquals("Worker 2 password","15472cd29f632e34f039403f2e635f66",workerTestList.get(1).getPassword());
      	assertEquals("Worker 2 transportation", 3, workerTestList.get(1).getTransportation());
      	assertEquals("Worker 2 Total Ratings", 0, workerTestList.get(1).getTotalRatings());
      	assertEquals("Worker 2 Total Deliveries", 0, workerTestList.get(1).getTotalDeliveries());
@@ -158,7 +154,7 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 3 name","Gator",workerTestList.get(2).getName());
      	assertEquals("Worker 3 email","inDA@swamp.net",workerTestList.get(2).getEmail());
      	assertEquals("Worker 3 username","tenFoot", workerTestList.get(2).getUsername());
-     	assertEquals("Worker 3 password","tail",workerTestList.get(2).getPassword());
+     	assertEquals("Worker 3 password","7aea2552dfe7eb84b9443b6fc9ba6e01",workerTestList.get(2).getPassword());
      	assertEquals("Worker 3 transportation", 3, workerTestList.get(2).getTransportation());
      	assertEquals("Worker 3 Total Ratings", 0, workerTestList.get(2).getTotalRatings());
      	assertEquals("Worker 3 Total Deliveries", 0, workerTestList.get(2).getTotalDeliveries());
@@ -168,18 +164,27 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 4 name","Tom",workerTestList.get(3).getName());
      	assertEquals("Worker 4 email","tom@gmail.com",workerTestList.get(3).getEmail());
      	assertEquals("Worker 4 username","killJerry", workerTestList.get(3).getUsername());
-     	assertEquals("Worker 4 password","never",workerTestList.get(3).getPassword());
+     	assertEquals("Worker 4 password","c7561db7a418dd39b2201dfe110ab4a4",workerTestList.get(3).getPassword());
      	assertEquals("Worker 4 transportation", 2, workerTestList.get(3).getTransportation());
      	assertEquals("Worker 4 Total Ratings", 0, workerTestList.get(3).getTotalRatings());
      	assertEquals("Worker 4 Total Deliveries", 0, workerTestList.get(3).getTotalDeliveries());
      	assertEquals("Worker 4 Pending Deliveries", 0, workerTestList.get(3).getPendingDeliveries());
      	assertEquals("Worker 4 role","worker",workerTestList.get(3).getRole());
      	
+     	//instance.hashPassword("whatI");
+     	//instance.hashPassword("passcode");
+     	//instance.hashPassword("tail");
+     	//instance.hashPassword("never");
+     	//instance.hashPassword("password");
+     	//instance.hashPassword("nope");
+     	//instance.hashPassword("ahhhh");
+     	//instance.hashPassword("yep");
      	
      	//HardTests
-     	//instance.changeWorkerPassword("helloNewPassword", "Tom");
-     	//instance.changeWorkerEmail("golden@gmail.com", "Gator");
-     	//instance.changeWorkerTransportation(1, "Gator");
+     	//instance.changeWorkerPassword("killjerry", "never", "helloNewPassword");
+     	//instance.changeWorkerEmail("golden@gmail.com", "tenFoot");
+     	//instance.changeWorkerTransportation(1, "tenFoot");
+     	
 	}
 	
 	@Test
@@ -206,6 +211,7 @@ public class DBHelperTest extends DBHelper {
      	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLoginWorker("henWinner", ""));
      	assertFalse("Invalid Username passed", instance.checkIfValidLoginWorker("heWinner", "whatI"));
      	assertFalse("Invalid password passed during login", instance.checkIfValidLoginWorker("henWinner", "what"));
+     	assertFalse("Invalid case change password passed during login", instance.checkIfValidLoginWorker("henWinner", "whati"));
      	
 	}
 	
@@ -237,5 +243,6 @@ public class DBHelperTest extends DBHelper {
      	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLoginClient("newWorld", ""));
      	assertFalse("Invalid Username passed", instance.checkIfValidLoginClient("neWorld", "ahhhh"));
      	assertFalse("Invalid password passed during login", instance.checkIfValidLoginClient("newWorld", "ahh"));
+     	assertFalse("Invalid case change password passed during login", instance.checkIfValidLoginClient("newWorld", "ahhhH"));
 	}
 }
