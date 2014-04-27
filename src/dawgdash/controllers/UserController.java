@@ -38,8 +38,10 @@ public class UserController extends HttpServlet {
 		// -----------------------------------------+
 		if(request.getParameter("task").equals("SCHEDULE")) {
 			// redirect to scheduling.jsp
-			if(session.getAttribute("role").equals("role")) {
+			if(session.getAttribute("role").equals("admin")) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/scheduling.jsp");
+				ArrayList<User> workers = helper.getWorkers();
+				request.setAttribute("workers", workers);
 				dispatcher.forward(request, response);
 			}
 			else {
@@ -55,8 +57,10 @@ public class UserController extends HttpServlet {
 		// -----------------------------------------------------+
 		if(request.getParameter("task").equals("ADMINISTRATION")) {
 			// redirect to account_administration.jsp
-			if(session.getAttribute("role").equals("role")) {
+			if(session.getAttribute("role").equals("admin")) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/account_administration.jsp");
+				ArrayList<User> users = helper.getAllUsers();
+				request.setAttribute("users", users);
 				dispatcher.forward(request, response);
 			}
 			else {
@@ -71,9 +75,23 @@ public class UserController extends HttpServlet {
 		// confirmation.jsp                                              |
 		// --------------------------------------------------------------+
 		if(request.getParameter("task").equals("GO_HOME")) {
-			// redirect to welcome.jsp
-			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/welcome.jsp");
-			dispatcher.forward(request, response);
+			// redirect to appropriate login view
+			if(session.getAttribute("role").equals("customer")) {
+				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/welcome.jsp");
+				dispatcher.forward(request, response);
+			}
+			else if(session.getAttribute("role").equals("worker")) {
+				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/worker_pending_deliveries.jsp");
+				User user = session.getAttribute("user");
+				int userId = user.getId();
+				ArrayList<Delivery> pendingDeliveries = helper.getPendingWorkerDeliveriesFor(userId);
+				request.setAttribute("pending_deliveries", pendingDeliveries);
+				dispatcher.forward(request, response);
+			}
+			else if(session.getAttribute("role").equals("admin")) {
+				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/admin.jsp");
+				dispatcher.forward(request, response);
+			}
 		}
 		
 		// ------------------------------------------------+
@@ -207,6 +225,8 @@ public class UserController extends HttpServlet {
 				User user = helper.getUser(userId);
 				session.setAttribute("user", user);
 				session.setAttribute("role", "worker");
+				ArrayList<Delivery> pendingDeliveries = helper.getPendingWorkerDeliveriesFor(userId);
+				request.setAttribute("pending_deliveries", pendingDeliveries);
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/worker_pending_deliveries.jsp");
 				dispatcher.forward(request, response);
 			}

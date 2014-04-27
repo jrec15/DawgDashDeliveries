@@ -16,10 +16,10 @@
 			<form action="User" method="POST">
 			<input type="hidden" name="task" value="ADMIN_CHANGE_PASSWORD" />
 				Worker: 
-				<select name="worker">
-					<option value="none">Select a worker...</option>
-					<c:forEach var="worker" items="${workers}">
-						<option value="${worker.iD}">${worker.name}</option>
+				<select name="account">
+					<option value="none">Select a user...</option>
+					<c:forEach var="user" items="${users}">
+						<option value="${user.iD}">${user.name}; ${user.role}</option>
 					</c:forEach>
 				</select><br>
 				Manager password: <input type="password" name="manager_password" /><br>

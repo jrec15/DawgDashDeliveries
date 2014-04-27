@@ -18,7 +18,7 @@
 	<body>
 		<h1>Assigned Deliveries</h1>
 		<c:if test="${empty pending_deliveries}">
-			<h3>No pending deliveries!</h3>
+			<h3>No pending deliveries</h3>
 		</c:if>
 		<c:if test="${not empty pending_deliveries}">
 			<table>

@@ -20,7 +20,7 @@
 			<h1>User Scheduling</h1>
 			<table>
 				<tr><th>Worker</th></tr>
-				<c:forEach var="worker" items="${schedule}">
+				<c:forEach var="worker" items="${workers}">
 					<tr><td><a href="User?task=INDIVIDUAL_SCHEDULE&worker_id=${worker.iD}">${worker.name}</a></td></tr>
 				</c:forEach>
 			</table>
