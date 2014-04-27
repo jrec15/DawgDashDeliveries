@@ -36,6 +36,7 @@ public class DBHelper {
     protected PreparedStatement checkIfUsernameExistsWorker;
     protected PreparedStatement checkIfValidLoginClient;
     protected PreparedStatement checkIfUsernameExistsClient;
+    protected PreparedStatement getWorkerRole;
     
 	public DBHelper() throws Exception {
 		//Might need to change to match your info
@@ -81,7 +82,7 @@ public class DBHelper {
             checkIfUsernameExistsWorker = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Worker` WHERE `Username` = ?");
             checkIfValidLoginClient = conn.prepareStatement("SELECT `Password` FROM `Client` WHERE `Username` = ?");
             checkIfUsernameExistsClient = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Client` WHERE `Username` = ?");
-            		
+            getWorkerRole = conn.prepareStatement("SELECT `Role` FROM `Worker` WHERE `Username` = ?");		
             
 		}
 		catch (SQLException sqle) {
@@ -736,7 +737,55 @@ public class DBHelper {
 		
 	}
 	
-    
+    public String checkIfValidLogin(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException, SQLException
+    {
+    	try
+    	{
+    		
+    		
+    		if (checkIfValidLoginWorker(passedUsername, passedPassword))
+    		{
+    			getWorkerRole.setString(1, passedUsername);
+    			ResultSet rsRole = getWorkerRole.executeQuery();
+    			if(rsRole.next())
+    			{
+    				
+    				String temp = rsRole.getString("Role");
+    				System.out.println(temp);
+    				temp = temp.toLowerCase();
+    				return temp;
+    			}
+    			else
+    			{
+    				return "ERROR IN LOGIN: WORKER";
+    			}
+    		}
+    		else if (checkIfValidLoginClient(passedUsername, passedPassword))
+    		{
+    			return "customer";
+    		}
+    		else
+    		{
+    			return "Invalid Username/Password";
+    		}
+    	}
+    	catch (SQLException sqle)
+        {
+            System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_WORKER: " + sqle.getMessage());
+        }
+    	catch (NoSuchAlgorithmException e)
+    	{
+    		System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
+    	}
+    	catch (UnsupportedEncodingException e)
+    	{
+    		System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
+    	}
+    	
+    	return "ERROR IN CHECK LOGIN";
+    }
+	
+	
 	public boolean checkIfValidLoginWorker(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
 	{
 		try
@@ -745,7 +794,7 @@ public class DBHelper {
 			String receivedUsername = passedUsername.trim();
 			checkIfUsernameExistsWorker.setString(1, receivedUsername);
 			ResultSet rsCount = checkIfUsernameExistsWorker.executeQuery();
-			while(rsCount.next())
+			if(rsCount.next())
 			{
 				int count = rsCount.getInt("COUNT(`Password`)");
 				if (count == 0)
@@ -760,10 +809,11 @@ public class DBHelper {
 			ResultSet rsPassword = checkIfValidLoginWorker.executeQuery();
 			
 			String password = null;
-			while(rsPassword.next())
+			if(rsPassword.next())
 			{
 				password = rsPassword.getString("Password");
 			}
+			
 			
 			String receivedPassword = hashPassword(passedPassword.trim());
 			if (password.equals(receivedPassword))
@@ -806,7 +856,7 @@ public class DBHelper {
 			String receivedName = passedUsername.trim();
 			checkIfUsernameExistsClient.setString(1, receivedName);
 			ResultSet rsCount = checkIfUsernameExistsClient.executeQuery();
-			while(rsCount.next())
+			if(rsCount.next())
 			{
 				int count = rsCount.getInt("COUNT(`Password`)");
 				if (count == 0)
@@ -821,7 +871,7 @@ public class DBHelper {
 			ResultSet rsPassword = checkIfValidLoginClient.executeQuery();
 			String password = null;
 			
-			while(rsPassword.next())
+			if(rsPassword.next())
 			{
 				password = rsPassword.getString("Password");
 			}
