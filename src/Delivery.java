@@ -4,14 +4,18 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 class Delivery {
 	private int ID;
-	private int estimateID;
+	private int clientID;
 	private int workerID;
 	private String deliveryStatus;
-	private String paymentStatus;
 	private int rating;
 	private String workerComment;
 	private String clientComment;
 	private Timestamp timeCompleted;
+	private int duration;
+	private double price;
+	private int transportation;
+	private String sourceAddress;
+	private String destinationAddress;
 	
 	/**
 	 * NOTE: This is only set to work for ASAP right now. To do a pickup time we would need that as a variable,
@@ -21,15 +25,20 @@ class Delivery {
 	 * is what we had planned for this or not)
 	 * @throws Exception 
 	 */
-	public Delivery(int estimateID, String clientComment) throws Exception {
+	public Delivery(int clientID, String clientComment, 
+			int transportation, String sourceAddress, String destinationAddress) throws Exception {
 		ID = 0;
-		this.estimateID = estimateID;
+		this.clientID = clientID;
 		deliveryStatus = "Pending"; //OR whatever we want here
-		paymentStatus = "Paid"; //Not sure we need this.. do we assume they've paid once delivery is official?
 		rating = 0; // I'm thinking 0 represents no rating received. 1-5 represent an actual rating given
 		workerComment = "None";
 		this.clientComment = clientComment;
 		timeCompleted = null; //Not sure what to do with timeCompleted here
+		duration = 30;
+		price = 30;
+		this.transportation = transportation;
+		this.sourceAddress = sourceAddress;
+		this.destinationAddress = destinationAddress;
 		
 		int maxRating = -1;
 		Worker bestWorker = null;
@@ -220,7 +229,7 @@ class Delivery {
 	 * Creates a delivery object when we already know all the parameters. Will be used when getting deliveries from
 	 * the database.
 	 * @param ID
-	 * @param estimateID
+	 * @param clientID
 	 * @param workerID
 	 * @param deliveryStatus
 	 * @param paymentStatus
@@ -228,18 +237,28 @@ class Delivery {
 	 * @param workerComment
 	 * @param clientComment
 	 * @param timeCompleted
+	 * @param duration
+	 * @param price
+	 * @param transportation
+	 * @param sourceAddress
+	 * @param destinationAddress
 	 */
-	public Delivery(int ID, int estimateID, int workerID, String deliveryStatus, String paymentStatus, int rating,
-			String workerComment, String clientComment, Timestamp timeCompleted) {
+	public Delivery(int ID, int clientID, int workerID, String deliveryStatus, int rating,
+			String workerComment, String clientComment, Timestamp timeCompleted, int duration,
+			int price, int transportation, String sourceAddress, String destinationAddress) {
 		this.ID = ID;
-		this.estimateID = estimateID;
+		this.clientID = clientID;
 		this.workerID = workerID;
 		this.deliveryStatus = deliveryStatus;
-		this.paymentStatus = paymentStatus;
 		this.rating = rating;
 		this.workerComment = workerComment;
 		this.clientComment = clientComment;
 		this.timeCompleted = timeCompleted;
+		this.duration = duration;
+		this.price = price;
+		this.transportation = transportation;
+		this.sourceAddress = sourceAddress;
+		this.destinationAddress = destinationAddress;
 	}
 
 	public int getID() {
@@ -312,5 +331,53 @@ class Delivery {
 
 	public void setTimeCompleted(Timestamp timeCompleted) {
 		this.timeCompleted = timeCompleted;
+	}
+	
+	public int getClientID() {
+		return clientID;
+	}
+
+	public void setClientID(int clientID) {
+		this.clientID = clientID;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public int getTransportation() {
+		return transportation;
+	}
+
+	public void setTransportation(int transportation) {
+		this.transportation = transportation;
+	}
+
+	public String getSourceAddress() {
+		return sourceAddress;
+	}
+
+	public void setSourceAddress(String sourceAddress) {
+		this.sourceAddress = sourceAddress;
+	}
+
+	public String getDestinationAddress() {
+		return destinationAddress;
+	}
+
+	public void setDestinationAddress(String destinationAddress) {
+		this.destinationAddress = destinationAddress;
 	}
 }

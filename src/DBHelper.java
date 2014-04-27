@@ -17,6 +17,7 @@ public class DBHelper {
 	protected PreparedStatement addWorkerStatement;
 	protected PreparedStatement setScheduleStatement;
 	protected PreparedStatement giveEstimateStatement;
+	protected PreparedStatement addDeliveryStatement;
 	
     protected PreparedStatement listClientsStatement;
 	protected PreparedStatement listWorkersStatement;
@@ -24,6 +25,12 @@ public class DBHelper {
 	protected PreparedStatement listDeliveriesStatement;
 	protected PreparedStatement listEstimatesStatement;
     
+	protected PreparedStatement changeDeliveryStatus;
+	protected PreparedStatement changeRating;
+	protected PreparedStatement changeWorkerComment;
+	protected PreparedStatement changeTimeCompleted;
+	protected PreparedStatement changeWorkerForDelivery;
+	
     protected PreparedStatement changeWorkerEmail;
 	protected PreparedStatement changeClientEmail;
 	protected PreparedStatement changeDefaultAddress;
@@ -57,18 +64,29 @@ public class DBHelper {
 					+ "`Pending Deliveries`, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			setScheduleStatement = conn.prepareStatement("INSERT INTO Schedule (`Worker ID`, Sunday, "
 					+ "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-			giveEstimateStatement = conn.prepareStatement("INSERT INTO Estimate (`Client ID`, Duration, "
-					+ "Price, Transportation, `Source Address`, `Destination Address`) VALUES (?, ?, ?, ?, ?, ?)");
+			addDeliveryStatement = conn.prepareStatement("INSERT INTO Delivery (`Client ID`, `Worker ID`, `Delivery Status`,"
+					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed`, Duration, Price, Transportation, "
+					+ "`Source Address, `Destination Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			//giveEstimateStatement = conn.prepareStatement("INSERT INTO Estimate (`Client ID`, Duration, "
+					//+ "Price, Transportation, `Source Address`, `Destination Address`) VALUES (?, ?, ?, ?, ?, ?)");
 			
             listClientsStatement = conn.prepareStatement("select ID, Name, `Default Address`, Email, Username, Password from Client");
 			listWorkersStatement = conn.prepareStatement("select ID, Name, Email, Username, Password, Transportation, Rating, "
 					+ "`Total Ratings`, `Total Deliveries`, `Pending Deliveries`, Role from Worker");
 			listSchedulesStatement = conn.prepareStatement("select `Worker ID`, Sunday, Monday, Tuesday, Wednesday, Thursday, "
 					+ "Friday, Saturday from Schedule");
-			listDeliveriesStatement = conn.prepareStatement("select ID, `Estimate ID`, `Worker ID`, `Delivery Status`, `Payment Status`, "
-					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed` from Delivery");
-			listEstimatesStatement = conn.prepareStatement("select `Client ID`, Duration, Price, Transportation, `Source Address`, `Destination Address` from Estimate");
+			listDeliveriesStatement = conn.prepareStatement("select ID, `Client ID`, `Worker ID`, `Delivery Status`, "
+					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed`, Duration, Price, Transportation,"
+					+ "`Source Address`, `Destination Address` from Delivery");
+			//listEstimatesStatement = conn.prepareStatement("select `Client ID`, Duration, Price, Transportation, `Source Address`, `Destination Address` from Estimate");
             
+			
+			changeDeliveryStatus = conn.prepareStatement("UPDATE `Delivery` SET `Delivery Status` WHERE ID = ?");
+			changeRating = conn.prepareStatement("UPDATE `Delivery` SET `Rating` WHERE ID = ?");
+			changeWorkerComment = conn.prepareStatement("UPDATE `Delivery` SET `Worker Comment` WHERE ID = ?");
+			changeTimeCompleted = conn.prepareStatement("UPDATE `Delivery` SET `Time Completed` WHERE ID = ?");
+			changeWorkerForDelivery = conn.prepareStatement("UPDATE `Delivery` Set `Worker ID` WHERE ID = ?");
+			
             changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `Username` = ?");
             changeWorkerEmail = conn.prepareStatement("UPDATE `Worker` SET `Email` = ? WHERE `Username` = ?");
             changeWorkerTransportation = conn.prepareStatement("UPDATE `Worker` SET `Transportation` = ? WHERE `Username` = ?");
@@ -174,7 +192,7 @@ public class DBHelper {
 		return list;
 	}
 	
-	/**
+	/*
 	 * Returns a list of all scheduled deliveries
 	 */
 	public ArrayList<Delivery> getDeliveryList(){
@@ -184,16 +202,21 @@ public class DBHelper {
 			while(rs.next()){
 				//package the current record as a Delivery object
 				int id = rs.getInt("ID");
-				int estimateID = rs.getInt("EstimateID");
-				int workerID = rs.getInt("WorkerID");
-				String deliveryStatus = rs.getString("DeliveryStatus");
-				String paymentStatus = rs.getString("PaymentStatus");
+				int clientID = rs.getInt("Client ID");
+				int workerID = rs.getInt("Worker ID");
+				String deliveryStatus = rs.getString("Delivery Status");
 				int rating = rs.getInt("Rating");
-				String workerComment = rs.getString("WorkerComment");
-				String clientComment = rs.getString("ClientComment");
-				Timestamp timeCompleted = rs.getTimestamp("TimeCompleted");
-				Delivery delivery = new Delivery(id, estimateID, workerID, deliveryStatus, paymentStatus, rating,
-						workerComment, clientComment, timeCompleted);
+				String workerComment = rs.getString("Worker Comment");
+				String clientComment = rs.getString("Client Comment");
+				Timestamp timeCompleted = rs.getTimestamp("Time Completed");
+				int duration = rs.getInt("Duration");
+				int price = rs.getInt("Price");
+				int transportation = rs.getInt("Transportation");
+				String sourceAddress = rs.getString("Source Address");
+				String destinationAddress = rs.getString("Destination Address");
+				Delivery delivery = new Delivery(id, clientID, workerID, deliveryStatus, rating,
+						workerComment, clientComment, timeCompleted, duration, price, transportation,
+						sourceAddress, destinationAddress);
 				//add the delivery to the list to be returned
 				list.add(delivery);
 			} //end of loop
@@ -202,6 +225,7 @@ public class DBHelper {
 		}
 		return list;
 	}
+	
 	
 	/**
 	 * Returns the client info for the client with the specified client ID
@@ -239,8 +263,7 @@ public class DBHelper {
 		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
 		for(int i = 0; i < deliveryList.size(); i++){
 			//get the client ID to check by getting the estimate ID first, which has a client ID attached
-			int estimateID = deliveryList.get(i).getEstimateID();
-			int checkID = getEstimate(estimateID).getClientID();
+			int checkID = deliveryList.get(i).getClientID();
 			if(checkID == clientID){
 				filteredList.add(deliveryList.get(i));
 			}
@@ -287,7 +310,7 @@ public class DBHelper {
 	
 	/**
 	 * Returns an estimate, which exists separately from a delivery
-	 */
+	 
 	public Estimate getEstimate(int estimateID){
 		ArrayList<Estimate> list = new ArrayList<Estimate>();
 		try{
@@ -315,6 +338,7 @@ public class DBHelper {
 		System.out.println("No Estimate found with ID " + estimateID + ".");
 		return null;
 	}
+	*/
 		
 	
 	/**
@@ -329,16 +353,21 @@ public class DBHelper {
 				int id = rs.getInt("ID");
 				if(rs.getInt("ID") == deliveryID){
 					//if id matches, get the remaining info and package as a Delivery object
-					int estimateID = rs.getInt("EstimateID");
-					int workerID = rs.getInt("WorkerID");
-					String deliveryStatus = rs.getString("DeliveryStatus");
-					String paymentStatus = rs.getString("PaymentStatus");
+					int clientID = rs.getInt("Client ID");
+					int workerID = rs.getInt("Worker ID");
+					String deliveryStatus = rs.getString("Delivery Status");
 					int rating = rs.getInt("Rating");
 					String workerComment = rs.getString("WorkerComment");
 					String clientComment = rs.getString("ClientComment");
 					Timestamp timeCompleted = rs.getTimestamp("TimeCompleted");
-					Delivery delivery = new Delivery(id, estimateID, workerID, deliveryStatus, paymentStatus, rating,
-							workerComment, clientComment, timeCompleted);
+					int duration = rs.getInt("Duration");
+					int price = rs.getInt("Price");
+					int transportation = rs.getInt("Transportation");
+					String sourceAddress = rs.getString("Source Address");
+					String destinationAddress = rs.getString("Destination Address");
+					Delivery delivery = new Delivery(id, clientID, workerID, deliveryStatus, rating,
+							workerComment, clientComment, timeCompleted, duration, price, transportation,
+							sourceAddress, destinationAddress);
 					//return the completed Delivery object
 					return delivery;
 				}
@@ -420,19 +449,25 @@ public class DBHelper {
 			}
 		}
 		
-		//Thinking complex stuff should actually go in estimate class?
-		public void giveEstimate(Estimate estimate) {
+		
+		public void addDelivery(Delivery delivery) {
 			try {
-				giveEstimateStatement.setInt(1, estimate.getClientID());
-				giveEstimateStatement.setInt(2, estimate.getDuration());
-				giveEstimateStatement.setDouble(3, estimate.getPrice());
-				giveEstimateStatement.setInt(4, estimate.getTransportation());
-				giveEstimateStatement.setString(5, estimate.getSourceAddress());
-				giveEstimateStatement.setString(6, estimate.getDestinationAddress());
-				giveEstimateStatement.executeUpdate();
+				addDeliveryStatement.setInt(1, delivery.getClientID());
+				addDeliveryStatement.setInt(2, delivery.getWorkerID());
+				addDeliveryStatement.setString(3, delivery.getDeliveryStatus());
+				addDeliveryStatement.setInt(4, delivery.getRating());
+				addDeliveryStatement.setString(5, delivery.getWorkerComment());
+				addDeliveryStatement.setString(6, delivery.getClientComment());
+				addDeliveryStatement.setTimestamp(7, delivery.getTimeCompleted());
+				addDeliveryStatement.setInt(8, delivery.getDuration());
+				addDeliveryStatement.setDouble(9, delivery.getPrice());
+				addDeliveryStatement.setInt(10, delivery.getTransportation());
+				addDeliveryStatement.setString(11, delivery.getSourceAddress());
+				addDeliveryStatement.setString(12, delivery.getDestinationAddress());
+				addDeliveryStatement.executeUpdate();
 			}
 			catch (SQLException sqle){
-				System.out.println("Exception in giveEstimate:" + sqle.getMessage());
+				System.out.println("Exception in addDelivery" + sqle.getMessage());
 			}
 		}
 		
@@ -497,26 +532,6 @@ public class DBHelper {
 			}
 		}
 		
-		public void setupEstimate() throws Exception{
-			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
-			String DB_USER = "root";
-			String DB_PASS = "";
-			//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
-			//String DB_USER = "athena";
-			//String DB_PASS = "wisdomgoddess";
-			try {
-				Class.forName("com.mysql.jdbc.Driver");
-				Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
-				PreparedStatement clearTableStatement = conn.prepareStatement("delete from Estimate");
-				clearTableStatement.execute();
-				PreparedStatement resetAutoIncrementStatement = conn.prepareStatement("ALTER TABLE Estimate AUTO_INCREMENT = 1");
-				resetAutoIncrementStatement.executeUpdate();
-			}
-			catch (SQLException sqle) {
-				System.out.println("Exception in setupEstimate:" + sqle.getMessage());
-			}
-		}
-		
 		public void setupDelivery() throws Exception{
 			String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 			String DB_USER = "root";
@@ -537,6 +552,72 @@ public class DBHelper {
 			}
 		}
 	
+		
+		public void changeDeliveryStatus(String deliveryStatus)
+	    {
+	        try
+	        {
+	        	changeDeliveryStatus.setString(1, deliveryStatus);
+	            changeDeliveryStatus.executeUpdate();
+	        }
+	        catch (SQLException sqle)
+	        {
+	            System.out.println("ERROR IN CHANGE DELIVERY STATUS: " + sqle.getMessage());
+	        }
+	    }
+		
+		public void changeRating(int rating)
+	    {
+	        try
+	        {
+	        	changeRating.setInt(1, rating);
+	            changeRating.executeUpdate();
+	        }
+	        catch (SQLException sqle)
+	        {
+	            System.out.println("ERROR IN CHANGE RATING: " + sqle.getMessage());
+	        }
+	    }
+		
+		public void changeWorkerComment(String workerComment)
+	    {
+	        try
+	        {
+	        	changeWorkerComment.setString(1, workerComment);
+	            changeWorkerComment.executeUpdate();
+	        }
+	        catch (SQLException sqle)
+	        {
+	            System.out.println("ERROR IN CHANGE WORKER COMMENT: " + sqle.getMessage());
+	        }
+	    }
+		
+		public void changeTimeCompleted(Timestamp timeCompleted)
+	    {
+	        try
+	        {
+	        	changeTimeCompleted.setTimestamp(1, timeCompleted);
+	            changeTimeCompleted.executeUpdate();
+	        }
+	        catch (SQLException sqle)
+	        {
+	            System.out.println("ERROR IN CHANGE TIME COMPLETED: " + sqle.getMessage());
+	        }
+	    }
+		
+		public void changeWorkerForDelivery(int workerID)
+	    {
+	        try
+	        {
+	        	changeWorkerForDelivery.setInt(1, workerID);
+	            changeWorkerForDelivery.executeUpdate();
+	        }
+	        catch (SQLException sqle)
+	        {
+	            System.out.println("ERROR IN CHANGE WORKER FOR DELIVERY: " + sqle.getMessage());
+	        }
+	    }
+		
 	//end justin
 	
     
