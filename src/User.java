@@ -1,24 +1,47 @@
+
 //package dawgdashdeliveries;
 
-import java.util.ArrayList;
 
-
-public class Worker {
+public class User {
 	private int ID;
 	private String name;
 	private String email;
 	private String username; // i dint think we use this, name can be username
 	private String password;
+	private String clientAddress;
 	private int transportation;
 	private int rating;
 	private int totalRatings;
 	private int totalDeliveries;
 	private int pendingDeliveries;
 	private String role;
-	private ArrayList<Delivery> deliveryList;
+	
+	/**Constructor to use when creating a new CLIENT.
+	 * 
+	 * @param name
+	 * @param email
+	 * @param username
+	 * @param password
+	 * @param clientAddress
+	 * @param role
+	 */
+	public User(String name, String email, String username, String password, String clientAddress, String role) {
+		ID = 0;//Questioning the id
+		this.name = name;
+		this.email = email;
+		this.username = username;
+		this.password = password;
+		this.clientAddress = clientAddress;
+		transportation = 0;
+		rating = 0;
+		totalRatings = 0;
+		totalDeliveries = 0;
+		pendingDeliveries = 0;
+		this.role = role;
+	}
 	
 	/**
-	 * Creates a when a new worker is added. We should know some of the paramters, and initialize
+	 * Constructor to use when creating a new WORKER. We should know some of the parameters, and initialize
 	 * the rest to default values;
 	 * @param name
 	 * @param email
@@ -27,23 +50,23 @@ public class Worker {
 	 * @param transportation
 	 * @param role
 	 */
-	public Worker(String name, String email, String username, String password, int transportation, String role) {
+	public User(String name, String email, String username, String password, int transportation, String role) {
 		ID = 0;//Questioning the id
 		this.name = name;
 		this.email = email;
 		this.username = username;
 		this.password = password;
+		this.clientAddress = null;
 		this.transportation = transportation;
 		rating = 0;
 		totalRatings = 0;
 		totalDeliveries = 0;
 		pendingDeliveries = 0;
 		this.role = role;
-		deliveryList = null; //NOT sure what to do here
 	}
 	
 	/**
-	 * Creates a worker when we know all the parameters (retrieving from database)
+	 * Creates a user when we know all the parameters (retrieving from database)
 	 * @param ID
 	 * @param name
 	 * @param email
@@ -57,30 +80,20 @@ public class Worker {
 	 * @param role
 	 * @throws Exception
 	 */
-	public Worker(int ID, String name, String email, String username, String password, int transportation, 
+	public User(int ID, String name, String email, String username, String password, String clientAddress, int transportation, 
 			int rating, int totalRatings, int totalDeliveries, int pendingDeliveries, String role) throws Exception {
 		this.ID = ID;
 		this.name = name;
 		this.email = email;
 		this.username = username;
 		this.password = password;
+		this.clientAddress = clientAddress;
 		this.transportation = transportation;
 		this.rating = rating;
 		this.totalRatings = totalRatings;
 		this.totalDeliveries = totalDeliveries;
 		this.pendingDeliveries = pendingDeliveries;
 		this.role = role;
-		//DBHelper instance = new DBHelper();
-		//deliveryList = instance.getDeliveryListWorker(ID);
-		//TODO: ADD BACK LATER
-	}
-	
-	public ArrayList<Delivery> getDeliveryList() {
-		return deliveryList;
-	}
-	
-	public void setDeliveryList(ArrayList<Delivery> deliveryList) {
-		this.deliveryList = deliveryList;
 	}
 
 	public int getID() {
@@ -151,5 +164,14 @@ public class Worker {
 	public String getUsername(){
 		return username;
     }
+
+	public String getClientAddress() {
+		return clientAddress;
+	}
+
+	public void setClientAddress(String clientAddress) {
+		this.clientAddress = clientAddress;
+	}
+	
 	
 }

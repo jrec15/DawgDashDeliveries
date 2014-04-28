@@ -43,12 +43,12 @@ public class Delivery {
 		this.sourceAddress = sourceAddress;
 		this.destinationAddress = destinationAddress;
 		
-		Worker bestWorker = null;
+		User bestWorker = null;
 		int minutesLeft;
 		int minPending = 100;
 		int maxRating = -1;
 		DBHelper instance = new DBHelper();		
-		for (Worker worker : instance.getWorkerList()) {
+		for (User worker : instance.getUserList()) {
 			 Schedule schedule = instance.getSchedule(worker.getID());
 			 Calendar calendar = Calendar.getInstance();
 			 int day = calendar.get(Calendar.DAY_OF_WEEK);

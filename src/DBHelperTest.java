@@ -2,7 +2,6 @@
 
 import static org.junit.Assert.*;
 
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 import org.junit.Before;
@@ -15,8 +14,7 @@ public class DBHelperTest extends DBHelper {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setupClient();
-		super.setupWorker();
+		super.setupUser();
 		super.setupSchedule();
 		super.setupDelivery();
 
@@ -29,14 +27,12 @@ public class DBHelperTest extends DBHelper {
 	
 	public DBHelperTest() throws Exception{
 		DBHelper helper = new DBHelper();
-    	assertNotNull("prepared statement should exist", helper.addClientStatement);
-    	assertNotNull("prepared statement should exist", helper.addWorkerStatement);
+    	assertNotNull("prepared statement should exist", helper.addUserStatement);
     	assertNotNull("prepared statement should exist", helper.setScheduleStatement);
     	assertNotNull("prepared statement should exist", helper.addDeliveryStatement);
 
     	
-    	assertNotNull("prepared statement should exist", helper.listClientsStatement);
-    	assertNotNull("prepared statement should exist", helper.listWorkersStatement);
+    	assertNotNull("prepared statement should exist", helper.listUsersStatement);
     	assertNotNull("prepared statement should exist", helper.listSchedulesStatement);
     	assertNotNull("prepared statement should exist", helper.listDeliveriesStatement);
     	
@@ -50,23 +46,16 @@ public class DBHelperTest extends DBHelper {
     	assertNotNull("prepared statement should exist", helper.changeRatingDelivery);
     	assertNotNull("prepared statement should exist", helper.changeWorkerPendingDeliveries);
     	
-    	assertNotNull("prepared statement should exist", helper.changeWorkerEmail);
-    	assertNotNull("prepared statement should exist", helper.changeClientEmail);
+    	assertNotNull("prepared statement should exist", helper.changeUserEmail);
     	assertNotNull("prepared statement should exist", helper.changeDefaultAddress);
-    	assertNotNull("prepared statement should exist", helper.changeClientPassword);
-    	assertNotNull("prepared statement should exist", helper.changeWorkerPassword);
+    	assertNotNull("prepared statement should exist", helper.changeUserPassword);
     	assertNotNull("prepared statement should exist", helper.changeWorkerTransportation);
-    	assertNotNull("prepared statement should exist", helper.removeClient);
-    	assertNotNull("prepared statement should exist", helper.removeWorker);
-    	assertNotNull("prepared statement should exist", helper.checkIfValidLoginWorker);
-    	assertNotNull("prepared statement should exist", helper.checkIfUsernameExistsWorker);
-    	assertNotNull("prepared statement should exist", helper.checkIfValidLoginClient);
-    	assertNotNull("prepared statement should exist", helper.checkIfUsernameExistsClient);
-    	assertNotNull("prepared statement should exist", helper.getWorkerRole);
+    	assertNotNull("prepared statement should exist", helper.removeUser);
+    	assertNotNull("prepared statement should exist", helper.checkIfValidLogin);
+    	assertNotNull("prepared statement should exist", helper.checkIfUsernameExists);
 	
     	assertNotNull("prepared statement should exist", helper.getSpecificDelivery);
-    	assertNotNull("prepared statement should exist", helper.getSpecificClient);
-    	assertNotNull("prepared statement should exist", helper.getSpecificWorker);
+    	assertNotNull("prepared statement should exist", helper.getSpecificUser);
     	assertNotNull("prepared statement should exist", helper.updateTotalRatings);
 	}
 	
@@ -74,54 +63,55 @@ public class DBHelperTest extends DBHelper {
 	public void testAddClient() throws Exception{
 		DBHelper instance = new DBHelper();
 		
-		Client client1 = new Client("David", "1180 White Oak Drive, Athens, GA 30606", "dseiav1@uga.edu",
-				"dss", "password");
-		Client client2 = new Client("Carrie", "1180 White Oak Drive, Athens, GA 30606", "wee12004@gmail.com",
-				"wee1", "nope");
-		Client client3 = new Client("Graphic Dude", "110 Ben Burton Parkway, Statham, GA 30666",
-				"newWorld@graphics.com", "newWorld", "ahhhh");
-		Client client4 = new Client("David S", "194 Highland Park Drive, Athens, GA 30605", "dseiav1@charter.net",
-				"dude", "yep");
+		User client1 = new User("David", "dseiav1@uga.edu",
+				"dss", "password", "1180 White Oak Drive, Athens, GA 30606", "client");
+		User client2 = new User("Carrie", "wee12004@gmail.com",
+				"wee1", "nope", "1180 White Oak Drive, Athens, GA 30606", "client");
+		User client3 = new User("Graphic Dude",
+				"newWorld@graphics.com", "newWorld", "ahhhh", "110 Ben Burton Parkway, Statham, GA 30666", "client");
+		User client4 = new User("David S", "dseiav1@charter.net",
+				"dude", "yep", "194 Highland Park Drive, Athens, GA 30605", "client");
 		
-		instance.addClient(client1);
-		instance.addClient(client2);
-		instance.addClient(client3);
-		instance.addClient(client4);
 		
-		ArrayList<Client> clientTestList= instance.getClientList();
-     	assertEquals("Clients in list",4, clientTestList.size());
+		instance.addUser(client1);
+		instance.addUser(client2);
+		instance.addUser(client3);
+		instance.addUser(client4);
+		
+		ArrayList<User> clientTestList= instance.getUserList();
+     	assertEquals("Users in list",4, clientTestList.size());
      	
      	assertEquals("Client 1 name","David",clientTestList.get(0).getName());
-     	assertEquals("Client 1 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(0).getDefaultAddress());
+     	assertEquals("Client 1 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(0).getClientAddress());
      	assertEquals("Client 1 email","dseiav1@uga.edu",clientTestList.get(0).getEmail());
      	assertEquals("Client 1 username","dss",clientTestList.get(0).getUsername());
      	assertEquals("Client 1 password","5f4dcc3b5aa765d61d8327deb882cf99",clientTestList.get(0).getPassword());
      	
      	assertEquals("Client 2 name","Carrie",clientTestList.get(1).getName());
-     	assertEquals("Client 2 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(1).getDefaultAddress());
+     	assertEquals("Client 2 address","1180 White Oak Drive, Athens, GA 30606",clientTestList.get(1).getClientAddress());
      	assertEquals("Client 2 email","wee12004@gmail.com",clientTestList.get(1).getEmail());
      	assertEquals("Client 2 username","wee1",clientTestList.get(1).getUsername());
      	assertEquals("Client 2 password","4101bef8794fed986e95dfb54850c68b",clientTestList.get(1).getPassword());
      	
      	assertEquals("Client 3 name","Graphic Dude",clientTestList.get(2).getName());
-     	assertEquals("Client 3 address","110 Ben Burton Parkway, Statham, GA 30666",clientTestList.get(2).getDefaultAddress());
+     	assertEquals("Client 3 address","110 Ben Burton Parkway, Statham, GA 30666",clientTestList.get(2).getClientAddress());
      	assertEquals("Client 3 email","newWorld@graphics.com",clientTestList.get(2).getEmail());
      	assertEquals("Client 3 username","newWorld",clientTestList.get(2).getUsername());
      	assertEquals("Client 3 password","82dfb76426e6e317209202b31056b07a",clientTestList.get(2).getPassword());
      	
      	assertEquals("Client 4 name","David S",clientTestList.get(3).getName());
-     	assertEquals("Client 4 address","194 Highland Park Drive, Athens, GA 30605",clientTestList.get(3).getDefaultAddress());
+     	assertEquals("Client 4 address","194 Highland Park Drive, Athens, GA 30605",clientTestList.get(3).getClientAddress());
      	assertEquals("Client 4 email","dseiav1@charter.net",clientTestList.get(3).getEmail());
      	assertEquals("Client 4 username","dude",clientTestList.get(3).getUsername());
      	assertEquals("Client 4 password","9348ae7851cf3ba798d9564ef308ec25",clientTestList.get(3).getPassword());
      	
      	//Checking if changes in information are correct
      	
-     	instance.changeClientPassword(1, "password", "hellokittY" );
-     	instance.changeClientEmail(3, "thisIsNew@gmail.com");
+     	instance.changeUserPassword(1, "password", "hellokittY" );
+     	instance.changeUserEmail(3, "thisIsNew@gmail.com");
      	
      	
-     	clientTestList= instance.getClientList();
+     	clientTestList= instance.getUserList();
      	assertEquals("Clients in list",4, clientTestList.size());
      	
      	assertEquals("Client 3 email","thisIsNew@gmail.com",clientTestList.get(2).getEmail());
@@ -134,18 +124,18 @@ public class DBHelperTest extends DBHelper {
 	public void testAddWorker() throws Exception{
 		DBHelper instance = new DBHelper();
 		
-		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
-		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
-		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
-		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
+		User worker1 = new User("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
+		User worker2 = new User("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
+		User worker3 = new User("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
+		User worker4 = new User("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
 		
-		instance.addWorker(worker1);
-		instance.addWorker(worker2);
-		instance.addWorker(worker3);
-		instance.addWorker(worker4);
+		instance.addUser(worker1);
+		instance.addUser(worker2);
+		instance.addUser(worker3);
+		instance.addUser(worker4);
 		
-		ArrayList<Worker> workerTestList= instance.getWorkerList();
-     	assertEquals("Worekrs in list",4, workerTestList.size());
+		ArrayList<User> workerTestList= instance.getUserList();
+     	assertEquals("Workers in list",4, workerTestList.size());
      	
      	assertEquals("Worker 1 name","Henry",workerTestList.get(0).getName());
      	assertEquals("Worker 1 email","hen@yahoo.com",workerTestList.get(0).getEmail());
@@ -190,143 +180,94 @@ public class DBHelperTest extends DBHelper {
      	
      	
      	//Checking when we change worker information 
-     	instance.changeWorkerPassword(4, "never", "helloNewPassword");
-     	instance.changeWorkerEmail(3,"golden@gmail.com");
+     	instance.changeUserPassword(4, "never", "helloNewPassword");
+     	instance.changeUserEmail(3,"golden@gmail.com");
      	instance.changeWorkerTransportation(3, 1);
      	
-     	//changeRating with zero ratings so far
-     	instance.changeRatingWorker(3, 5);
-     	
-     	//changeRating with zero, the add another rating
-     	instance.changeRatingWorker(4, 3);
+     	/**changeRating with zero ratings so far
      	instance.changeRatingWorker(4, 5);
      	
-     	workerTestList= instance.getWorkerList();
+     	//changeRating with zero, the add another rating
+     	instance.changeRatingWorker(3, 0);
+     	instance.changeRatingWorker(3, 5);
+     	**/
+     	workerTestList= instance.getUserList();
      	assertEquals("Worekrs in list",4, workerTestList.size());
      	
      	assertEquals("Worker 4 password","3ed658947f0715d56ed555b172ac0b3b",workerTestList.get(3).getPassword());
 	    assertEquals("Worker 3 email","golden@gmail.com",workerTestList.get(2).getEmail());
 	    assertEquals("Worker 3 transportation", 1, workerTestList.get(2).getTransportation());
-     	
+     	/**
      	assertEquals("Worker 3 rating is", 5, workerTestList.get(2).getRating());
-     	assertEquals("Worker 3 total ratings", 1, workerTestList.get(2).getTotalRatings());
+     	assertEquals("Worker 3 total ratings", 2, workerTestList.get(2).getTotalRatings());
      	
      	assertEquals("Worker 4 rating is", 4, workerTestList.get(3).getRating());
-     	assertEquals("Worker 4 total ratings", 2, workerTestList.get(3).getTotalRatings());
+     	assertEquals("Worker 4 total ratings", 1, workerTestList.get(3).getTotalRatings());
+     	**/
      	
     }
-	
-	@Test
-	public void testCheckIfValidLoginWorker() throws Exception{
-		DBHelper instance = new DBHelper();
-		
-		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
-		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
-		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
-		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
-		
-		instance.addWorker(worker1);
-		instance.addWorker(worker2);
-		instance.addWorker(worker3);
-		instance.addWorker(worker4);
-		
-		ArrayList<Worker> workerTestList= instance.getWorkerList();
-     	assertEquals("Worekrs in list",4, workerTestList.size());
-     	
-     	assertTrue("Test to see if password login is true without extra space: ", instance.checkIfValidLoginWorker("henWinner", "whatI"));
-     	assertTrue("Test to see if password login is true with extra space on password: ", instance.checkIfValidLoginWorker("henWinner", "whatI "));
-     	assertTrue("Test to see if password login is true with extra space on username: ", instance.checkIfValidLoginWorker("henWinner ", "whatI"));
-     	
-     	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLoginWorker("henWinner", ""));
-     	assertFalse("Invalid Username passed", instance.checkIfValidLoginWorker("heWinner", "whatI"));
-     	assertFalse("Invalid password passed during login", instance.checkIfValidLoginWorker("henWinner", "what"));
-     	assertFalse("Invalid case change password passed during login", instance.checkIfValidLoginWorker("henWinner", "whati"));
-     	
-	}
-	
-	@Test
-	public void testCheckIfValidLoginClient() throws Exception{
-		DBHelper instance = new DBHelper();
-	
-		Client client1 = new Client("David", "1180 White Oak Drive, Athens, GA 30606", "dseiav1@uga.edu",
-				"dss", "password");
-		Client client2 = new Client("Carrie", "1180 White Oak Drive, Athens, GA 30606", "wee12004@gmail.com",
-				"wee1", "nope");
-		Client client3 = new Client("Graphic Dude", "110 Ben Burton Parkway, Statham, GA 30666",
-				"newWorld@graphics.com", "newWorld", "ahhhh");
-		Client client4 = new Client("David S", "194 Highland Park Drive, Athens, GA 30605", "dseiav1@charter.net",
-				"dude", "yep");
-		
-		instance.addClient(client1);
-		instance.addClient(client2);
-		instance.addClient(client3);
-		instance.addClient(client4);
-		
-		ArrayList<Client> clientTestList= instance.getClientList();
-     	assertEquals("Clients in list",4, clientTestList.size());
-     	
-     	assertTrue("Test to see if password login is true without extra space: ", instance.checkIfValidLoginClient("newWorld", "ahhhh"));
-     	assertTrue("Test to see if password login is true with extra space on password: ", instance.checkIfValidLoginClient("newWorld", "ahhhh "));
-     	assertTrue("Test to see if password login is true with extra space on username: ", instance.checkIfValidLoginClient("newWorld ", "ahhhh"));
-     	
-     	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLoginClient("newWorld", ""));
-     	assertFalse("Invalid Username passed", instance.checkIfValidLoginClient("neWorld", "ahhhh"));
-     	assertFalse("Invalid password passed during login", instance.checkIfValidLoginClient("newWorld", "ahh"));
-     	assertFalse("Invalid case change password passed during login", instance.checkIfValidLoginClient("newWorld", "ahhhH"));
-	}
-
 	
 	@Test
 	public void testCheckIfValidLogin() throws Exception{
 		DBHelper instance = new DBHelper();
 		
-		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
-		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
-		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
-		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
+		User worker1 = new User("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
+		User worker2 = new User("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
+		User worker3 = new User("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
+		User worker4 = new User("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
 		
-		instance.addWorker(worker1);
-		instance.addWorker(worker2);
-		instance.addWorker(worker3);
-		instance.addWorker(worker4);
+		instance.addUser(worker1);
+		instance.addUser(worker2);
+		instance.addUser(worker3);
+		instance.addUser(worker4);
 		
-		Client client1 = new Client("David", "1180 White Oak Drive, Athens, GA 30606", "dseiav1@uga.edu",
-				"dss", "password");
-		Client client2 = new Client("Carrie", "1180 White Oak Drive, Athens, GA 30606", "wee12004@gmail.com",
-				"wee1", "nope");
-		Client client3 = new Client("Graphic Dude", "110 Ben Burton Parkway, Statham, GA 30666",
-				"newWorld@graphics.com", "newWorld", "ahhhh");
-		Client client4 = new Client("David S", "194 Highland Park Drive, Athens, GA 30605", "dseiav1@charter.net",
-				"dude", "yep");
-		
-		instance.addClient(client1);
-		instance.addClient(client2);
-		instance.addClient(client3);
-		instance.addClient(client4);
-		
-		ArrayList<Worker> workerTestList= instance.getWorkerList();
+		ArrayList<User> workerTestList= instance.getUserList();
      	assertEquals("Worekrs in list",4, workerTestList.size());
      	
-     	assertEquals("Test to see if password login is true without extra space: return role", "worker",  instance.checkIfValidLogin("henWinner", "whatI"));
-     	assertEquals("Test to see if password login is true with extra space on password: return role", "worker", instance.checkIfValidLogin("henWinner", "whatI "));
-     	assertEquals("Test to see if password login is true with extra space on username: return role", "worker", instance.checkIfValidLogin("henWinner ", "whatI"));
-     	assertEquals("Test to see if password login is true without extra space on username: return role", "admin", instance.checkIfValidLogin("kingEnd ", "passcode"));
+     	assertTrue("Test to see if password login is true without extra space: ", instance.checkIfValidLogin("henWinner", "whatI"));
+     	assertTrue("Test to see if password login is true with extra space on password: ", instance.checkIfValidLogin("henWinner", "whatI "));
+     	assertTrue("Test to see if password login is true with extra space on username: ", instance.checkIfValidLogin("henWinner ", "whatI"));
      	
-     	assertEquals("Test to see if no password passed during login: is rejected", "Invalid Username/Password", instance.checkIfValidLogin("henWinner", ""));
-     	assertEquals("Invalid Username passed during login: is rejected", "Invalid Username/Password", instance.checkIfValidLogin("heWinner", "whatI"));
-     	assertEquals("Invalid password passed during login: is rejected", "Invalid Username/Password", instance.checkIfValidLogin("henWinner", "what"));
-     	assertEquals("Invalid case change password passed during login: is rejected", "Invalid Username/Password", instance.checkIfValidLogin("henWinner", "whati"));
+     	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLogin("henWinner", ""));
+     	assertFalse("Invalid Username passed", instance.checkIfValidLogin("heWinner", "whatI"));
+     	assertFalse("Invalid password passed during login", instance.checkIfValidLogin("henWinner", "what"));
+     	assertFalse("Invalid case change password passed during login", instance.checkIfValidLogin("henWinner", "whati"));
      	
-     	ArrayList<Client> clientTestList= instance.getClientList();
-     	assertEquals("Clients in list",4, clientTestList.size());
-     	
-     	assertEquals("Test to see if password login is true without extra space: ", "customer", instance.checkIfValidLogin("newWorld", "ahhhh"));
-     	assertEquals("Test to see if password login is true with extra space on password: ", "customer", instance.checkIfValidLogin("newWorld", "ahhhh "));
-     	assertEquals("Test to see if password login is true with extra space on username: ", "customer",instance.checkIfValidLogin("newWorld ", "ahhhh"));
-     	
-     	assertEquals("Test to see if no password passed during login is false", "Invalid Username/Password", instance.checkIfValidLogin("newWorld", ""));
-     	assertEquals("Invalid Username passed", "Invalid Username/Password",instance.checkIfValidLogin("neWorld", "ahhhh"));
-     	assertEquals("Invalid password passed during login", "Invalid Username/Password", instance.checkIfValidLogin("newWorld", "ahh"));
-     	assertEquals("Invalid case change password passed during login", "Invalid Username/Password", instance.checkIfValidLogin("newWorld", "ahhhH"));
 	}
+	
+	@Test
+	public void testCheckIfValidLogin2() throws Exception{
+		DBHelper instance = new DBHelper();
+		
+		User client1 = new User("David", "dseiav1@uga.edu",
+				"dss", "password", "1180 White Oak Drive, Athens, GA 30606", "client");
+		User client2 = new User("Carrie", "wee12004@gmail.com",
+				"wee1", "nope", "1180 White Oak Drive, Athens, GA 30606", "client");
+		User client3 = new User("Graphic Dude",
+				"newWorld@graphics.com", "newWorld", "ahhhh", "110 Ben Burton Parkway, Statham, GA 30666", "client");
+		User client4 = new User("David S", "dseiav1@charter.net",
+				"dude", "yep", "194 Highland Park Drive, Athens, GA 30605", "client");
+		
+		instance.addUser(client1);
+		instance.addUser(client2);
+		instance.addUser(client3);
+		instance.addUser(client4);
+		
+		ArrayList<User> clientTestList= instance.getUserList();
+     	assertEquals("Users in list",4, clientTestList.size());
+     	
+     	assertTrue("Test to see if password login is true without extra space: ", instance.checkIfValidLogin("newWorld", "ahhhh"));
+     	assertTrue("Test to see if password login is true with extra space on password: ", instance.checkIfValidLogin("newWorld", "ahhhh "));
+     	assertTrue("Test to see if password login is true with extra space on username: ", instance.checkIfValidLogin("newWorld ", "ahhhh"));
+     	
+     	assertFalse("Test to see if no password passed during login is false", instance.checkIfValidLogin("newWorld", ""));
+     	assertFalse("Invalid Username passed", instance.checkIfValidLogin("neWorld", "ahhhh"));
+     	assertFalse("Invalid password passed during login", instance.checkIfValidLogin("newWorld", "ahh"));
+     	assertFalse("Invalid case change password passed during login", instance.checkIfValidLogin("newWorld", "ahhhH"));
+	}
+
+	
+
+
+	
 }

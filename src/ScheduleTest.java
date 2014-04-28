@@ -17,8 +17,7 @@ public class ScheduleTest {
 	public void setUp() throws Exception {
 		DBHelper instance = new DBHelper();
 		
-		instance.setupClient();
-		instance.setupWorker();
+		instance.setupUser();
 		instance.setupDelivery();
 		instance.setupSchedule();
 	}
@@ -31,18 +30,18 @@ public class ScheduleTest {
 		DBHelper instance = new DBHelper();
 		
 		
-		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
+		User worker1 = new User("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
 		worker1.setRating(3);
-		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
+		User worker2 = new User("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
 		worker2.setRating(2);
-		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
+		User worker3 = new User("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
 		worker3.setRating(4);
-		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
+		User worker4 = new User("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
 		worker4.setRating(5);
-		instance.addWorker(worker1);
-		instance.addWorker(worker2);
-		instance.addWorker(worker3);
-		instance.addWorker(worker4);
+		instance.addUser(worker1);
+		instance.addUser(worker2);
+		instance.addUser(worker3);
+		instance.addUser(worker4);
 		
 		Schedule schedule1 = new Schedule(1, "12-30-23-00", "01-00-09-00", "08-30-14-30", "10-20-17-30", "08-00-12-00", "14-00-18-00", "00-00-00-00");
 		Schedule schedule2 = new Schedule(2, "08-15-13-30", "00-00-00-00", "09-15-15-30", "08-00-13-00", "12-00-16-00", "08-00-12-00", "13-00-18-00");

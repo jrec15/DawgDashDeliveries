@@ -14,8 +14,7 @@ public class DeliveryTest {
 	public void setUp() throws Exception {
 		DBHelper instance = new DBHelper();
 		
-		instance.setupClient();
-		instance.setupWorker();
+		instance.setupUser();
 		instance.setupSchedule();
 		instance.setupDelivery();
 	}
@@ -27,31 +26,31 @@ public class DeliveryTest {
 	public void testConstructor() throws Exception {
 		DBHelper instance = new DBHelper();
 		
-		Client client1 = new Client("David", "1180 White Oak Drive, Athens, GA 30606", "dseiav1@uga.edu",
-				"dss", "password");
-		Client client2 = new Client("Carrie", "1180 White Oak Drive, Athens, GA 30606", "wee12004@gmail.com",
-				"wee1", "nope");
-		Client client3 = new Client("Graphic Dude", "110 Ben Burton Parkway, Statham, GA 30666",
-				"newWorld@graphics.com", "newWorld", "ahhhh");
-		Client client4 = new Client("David S", "194 Highland Park Drive, Athens, GA 30605", "dseiav1@charter.net",
-				"dude", "yep");
-		instance.addClient(client1);
-		instance.addClient(client2);
-		instance.addClient(client3);
-		instance.addClient(client4);
+		User client1 = new User("David", "dseiav1@uga.edu",
+				"dss", "password", "1180 White Oak Drive, Athens, GA 30606", "client");
+		User client2 = new User("Carrie", "wee12004@gmail.com",
+				"wee1", "nope", "1180 White Oak Drive, Athens, GA 30606", "client");
+		User client3 = new User("Graphic Dude",
+				"newWorld@graphics.com", "newWorld", "ahhhh", "110 Ben Burton Parkway, Statham, GA 30666", "client");
+		User client4 = new User("David S", "dseiav1@charter.net",
+				"dude", "yep", "194 Highland Park Drive, Athens, GA 30605", "client");
+		instance.addUser(client1);
+		instance.addUser(client2);
+		instance.addUser(client3);
+		instance.addUser(client4);
 		
-		Worker worker1 = new Worker("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
+		User worker1 = new User("Henry", "hen@yahoo.com", "henWinner", "whatI", 1, "worker");
 		worker1.setRating(3);
-		Worker worker2 = new Worker("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
+		User worker2 = new User("Carl", "carl@dawgdashdeliveries.com", "kingEND", "passcode", 3, "admin");
 		worker2.setRating(2);
-		Worker worker3 = new Worker("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
+		User worker3 = new User("Gator", "inDA@swamp.net", "tenFoot", "tail", 3, "worker");
 		worker3.setRating(4);
-		Worker worker4 = new Worker("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
+		User worker4 = new User("Tom", "tom@gmail.com", "killJerry", "never", 2, "worker");
 		worker4.setRating(5);
-		instance.addWorker(worker1);
-		instance.addWorker(worker2);
-		instance.addWorker(worker3);
-		instance.addWorker(worker4);
+		instance.addUser(worker1);
+		instance.addUser(worker2);
+		instance.addUser(worker3);
+		instance.addUser(worker4);
 		
 		Schedule schedule1 = new Schedule(1, "12-30-24-00", "01-00-24-00", "08-30-14-30", "10-20-17-30", "08-00-12-00", "14-00-18-00", "00-00-00-00");
 		Schedule schedule2 = new Schedule(2, "08-15-13-30", "01-00-00-00", "09-15-15-30", "08-00-13-00", "12-00-16-00", "08-00-12-00", "13-00-18-00");

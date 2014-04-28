@@ -14,13 +14,11 @@ import java.util.Date;
 
 public class DBHelper {
 
-	protected PreparedStatement addClientStatement;//
-	protected PreparedStatement addWorkerStatement;//
+	protected PreparedStatement addUserStatement;//
 	protected PreparedStatement setScheduleStatement;//
 	protected PreparedStatement addDeliveryStatement;//
 
-	protected PreparedStatement listClientsStatement;//
-	protected PreparedStatement listWorkersStatement;//
+	protected PreparedStatement listUsersStatement;//
 	protected PreparedStatement listSchedulesStatement;//
 	protected PreparedStatement listDeliveriesStatement;//
 
@@ -37,23 +35,16 @@ public class DBHelper {
 
 	protected PreparedStatement changeWorkerPendingDeliveries;//
 
-	protected PreparedStatement changeWorkerEmail;//
-	protected PreparedStatement changeClientEmail;//
+	protected PreparedStatement changeUserEmail;//
 	protected PreparedStatement changeDefaultAddress;//
-	protected PreparedStatement changeClientPassword;//
-	protected PreparedStatement changeWorkerPassword;//
+	protected PreparedStatement changeUserPassword;//
 	protected PreparedStatement changeWorkerTransportation;//
-	protected PreparedStatement removeClient;//
-	protected PreparedStatement removeWorker;//
-	protected PreparedStatement checkIfValidLoginWorker;//
-	protected PreparedStatement checkIfUsernameExistsWorker;//
-	protected PreparedStatement checkIfValidLoginClient;//
-	protected PreparedStatement checkIfUsernameExistsClient;//
-	protected PreparedStatement getWorkerRole;//
+	protected PreparedStatement removeUser;//
+	protected PreparedStatement checkIfValidLogin;//
+	protected PreparedStatement checkIfUsernameExists;//
 
 	protected PreparedStatement getSpecificDelivery;
-	protected PreparedStatement getSpecificClient;//
-	protected PreparedStatement getSpecificWorker;//
+	protected PreparedStatement getSpecificUser;//
 	protected PreparedStatement updateTotalRatings;//
 
 	public DBHelper() throws Exception {
@@ -71,11 +62,9 @@ public class DBHelper {
 
 
 			//add prepared statements here
-			addClientStatement = conn.prepareStatement("INSERT INTO Client (Name, `Default "
-					+ "Address`, Email, Username, Password) VALUES (?, ?, ?, ?, ?)");
-			addWorkerStatement = conn.prepareStatement("INSERT INTO Worker (Name, Email, Username, "
-					+ "Password, Transportation, Rating, `Total Ratings`, `Total Deliveries`,"
-					+ "`Pending Deliveries`, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			addUserStatement = conn.prepareStatement("INSERT INTO User (Name, Email, Username, Password, "
+					+ "`Client Address`, Transportation, Rating, `Total Ratings`,"
+					+ "`Total Deliveries`, `Pending Deliveries`, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			setScheduleStatement = conn.prepareStatement("INSERT INTO Schedule (`Worker ID`, Sunday, "
 					+ "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			addDeliveryStatement = conn.prepareStatement("INSERT INTO Delivery (`Client ID`, `Worker ID`, `Delivery Status`,"
@@ -84,13 +73,12 @@ public class DBHelper {
 
 
 
+			//TODO: ALL WORKER IDs/CLIENT IDs will be changed later
 
 
-
-
-			listClientsStatement = conn.prepareStatement("select ID, Name, `Default Address`, Email, Username, Password from Client");
-			listWorkersStatement = conn.prepareStatement("select ID, Name, Email, Username, Password, Transportation, Rating, "
-					+ "`Total Ratings`, `Total Deliveries`, `Pending Deliveries`, Role from Worker");
+			
+			listUsersStatement = conn.prepareStatement("select ID, Name, Email, Username, Password, `Client Address`, Transportation, Rating, "
+					+ "`Total Ratings`, `Total Deliveries`, `Pending Deliveries`, Role from User");
 			listSchedulesStatement = conn.prepareStatement("select `Worker ID`, Sunday, Monday, Tuesday, Wednesday, Thursday, "
 					+ "Friday, Saturday from Schedule");
 			listDeliveriesStatement = conn.prepareStatement("select ID, `Client ID`, `Worker ID`, `Delivery Status`, "
@@ -104,28 +92,22 @@ public class DBHelper {
 			changeWorkerForDelivery = conn.prepareStatement("UPDATE `Delivery` Set `Worker ID` = ? WHERE ID = ?");
 			changeRatingDelivery = conn.prepareStatement("UPDATE `Delivery` SET `Rating` = ? WHERE `ID` = ?");
 			
-			changeWorkerPendingDeliveries = conn.prepareStatement("UPDATE `Worker` Set `Pending Deliveries` = ? Where ID = ?");
-			changeRatingWorker = conn.prepareStatement("UPDATE `Worker` SET `Rating` = ? WHERE `ID` = ?");
-
-			changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `ID` = ?");
-			changeWorkerEmail = conn.prepareStatement("UPDATE `Worker` SET `Email` = ? WHERE `ID` = ?");
-			changeWorkerTransportation = conn.prepareStatement("UPDATE `Worker` SET `Transportation` = ? WHERE `ID` = ?");
-			changeDefaultAddress = conn.prepareStatement("UPDATE `Client` SET `Default Address` = ? WHERE `ID` = ?");
-			changeClientPassword = conn.prepareStatement("UPDATE `Client` SET `Password` = ? WHERE `ID` = ?");
-			changeWorkerPassword = conn.prepareStatement("UPDATE `Worker` SET `Password` = ? WHERE `ID` = ?");
-			removeClient = conn.prepareStatement("DELETE FROM `Client` WHERE `ID` = ?");
-			removeWorker = conn.prepareStatement("DELETE FROM `Worker` WHERE `ID` = ?");		
+			changeWorkerPendingDeliveries = conn.prepareStatement("UPDATE `User` Set `Pending Deliveries` = ? Where ID = ?");
+			changeRatingWorker = conn.prepareStatement("UPDATE `User` SET `Rating` = ? WHERE `ID` = ?");
+			
+			//TODO LATER
+			changeUserEmail = conn.prepareStatement("UPDATE `User` SET `Email` = ? WHERE `ID` = ?");
+			changeWorkerTransportation = conn.prepareStatement("UPDATE `User` SET `Transportation` = ? WHERE `ID` = ?");
+			changeDefaultAddress = conn.prepareStatement("UPDATE `User` SET `Client Address` = ? WHERE `ID` = ?");
+			changeUserPassword = conn.prepareStatement("UPDATE `User` SET `Password` = ? WHERE `ID` = ?");
+			removeUser = conn.prepareStatement("DELETE FROM `User` WHERE `ID` = ?");		
 			getSpecificDelivery = conn.prepareStatement("SELECT * FROM `Delivery` WHERE `ID` = ?");
-			getSpecificClient = conn.prepareStatement("SELECT * FROM `Client` WHERE `ID` = ?");
-			getSpecificWorker = conn.prepareStatement("SELECT * FROM `Worker` WHERE `ID` = ?");
-			updateTotalRatings = conn.prepareStatement("UPDATE `Worker` SET `Total Ratings` = ? WHERE `ID` = ?");
+			getSpecificUser = conn.prepareStatement("SELECT * FROM `User` WHERE `ID` = ?");
+			updateTotalRatings = conn.prepareStatement("UPDATE `User` SET `Total Ratings` = ? WHERE `ID` = ?");
 			
 			//Relates to login so username already passed in during field checks
-			checkIfValidLoginWorker = conn.prepareStatement("SELECT `Password` FROM `Worker` WHERE `Username` = ?");
-			checkIfUsernameExistsWorker = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Worker` WHERE `Username` = ?");
-			checkIfValidLoginClient = conn.prepareStatement("SELECT `Password` FROM `Client` WHERE `Username` = ?");
-			checkIfUsernameExistsClient = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Client` WHERE `Username` = ?");
-			getWorkerRole = conn.prepareStatement("SELECT `Role` FROM `Worker` WHERE `Username` = ?");
+			checkIfValidLogin = conn.prepareStatement("SELECT `Password` FROM `User` WHERE `Username` = ?");
+			checkIfUsernameExists = conn.prepareStatement("SELECT COUNT(`Password`) FROM `User` WHERE `Username` = ?");
 		}
 		catch (SQLException sqle) {
 			System.out.println("Exception in Constructor:" + sqle.getMessage());
@@ -133,59 +115,35 @@ public class DBHelper {
 	}
 
 	//David Herald
-	/** 
-	 * Returns a list of all clients
-	 */
-	public ArrayList<Client> getClientList(){
-		ArrayList<Client> list = new ArrayList<Client>();
-
-		try{
-			ResultSet rs = listClientsStatement.executeQuery();
-			while(rs.next()){
-				//package the current record as a Client object
-				int id = rs.getInt("ID");
-				String name = rs.getString("Name");
-				String defaddress = rs.getString("Default Address");
-				String email = rs.getString("Email");
-				String username = rs.getString("Username");
-				String password = rs.getString("Password");
-				Client client = new Client(id, name, defaddress, email, username, password);
-				//add the client to the list to return
-				list.add(client);
-			} //end of loop
-		}catch(Exception e){
-			System.out.println("Error populating Client list\n" + e.getClass().getName() + ": " + e.getMessage());
-		}
-		return list;
-	}
 
 	/**
-	 * Returns a list of all workers
+	 * Returns a list of all users
 	 */
-	public ArrayList<Worker> getWorkerList(){
-		ArrayList<Worker> list = new ArrayList<Worker>();
+	public ArrayList<User> getUserList(){
+		ArrayList<User> list = new ArrayList<User>();
 		try{
-			ResultSet rs = listWorkersStatement.executeQuery();
+			ResultSet rs = listUsersStatement.executeQuery();
 			while(rs.next()){
-				//package the current record as a Worker object
+				//package the current record as a User object
 				int id = rs.getInt("ID");
 				String name = rs.getString("Name");
 				String email = rs.getString("Email");
 				String username = rs.getString("Username");
 				String password = rs.getString("Password");
+				String clientAddress = rs.getString("Client Address");
 				int transportation = rs.getInt("Transportation");
 				int rating = rs.getInt("Rating");
 				int totalRating = rs.getInt("Total Ratings");
 				int totalDeliveries = rs.getInt("Total Deliveries");
 				int pendingDeliveries = rs.getInt("Pending Deliveries");
 				String role = rs.getString("Role");
-				Worker worker = new Worker(id, name, email, username, password, transportation, rating, totalRating, 
+				User user = new User(id, name, email, username, password, clientAddress, transportation, rating, totalRating, 
 						totalDeliveries, pendingDeliveries, role);
-				//add the worker to the list to return
-				list.add(worker);
+				//add the user to the list to return
+				list.add(user);
 			} //end of loop
 		}catch(Exception e){
-			System.out.println("Error populating Worker list\n" + e.getClass().getName() + ": " + e.getMessage());
+			System.out.println("Error populating User list\n" + e.getClass().getName() + ": " + e.getMessage());
 		}
 		return list;
 	}
@@ -251,38 +209,23 @@ public class DBHelper {
 		return list;
 	}
 
-
 	/**
-	 * Returns the client info for the client with the specified client ID
+	 * Returns the user info for the user with the specified user ID
 	 */
-	public Client getClient(int clientID){
-		ArrayList<Client> clientList = getClientList();
-		for(int i = 0; i < clientList.size(); i++){
-			if(clientList.get(i).getID() == clientID){
-				return clientList.get(i);
+	public User getUser(int userID){
+		ArrayList<User> userList = getUserList();
+		for(int i = 0; i < userList.size(); i++){
+			if(userList.get(i).getID() == userID){
+				return userList.get(i);
 			}
 		}
-		System.out.println("Client with id " + clientID + " not found.");
+		System.out.println("User with id " + userID + " not found.");
 		return null;
 	}
-
-	/**
-	 * Returns the worker info for the worker with the specified worker ID
-	 */
-	public Worker getWorker(int workerID){
-		ArrayList<Worker> workerList = getWorkerList();
-		for(int i = 0; i < workerList.size(); i++){
-			if(workerList.get(i).getID() == workerID){
-				return workerList.get(i);
-			}
-		}
-		System.out.println("Worker with id " + workerID + " not found.");
-		return null;
-	}
-
-	/**
+	
+	/** ADD OR DELETE LATER IF WE NEED OR DONT NEED
 	 * Returns a list of deliveries for a single client
-	 */
+	 *
 	public ArrayList<Delivery> getDeliveryListClient(int clientID){
 		ArrayList<Delivery> deliveryList = getDeliveryList();
 		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
@@ -302,7 +245,7 @@ public class DBHelper {
 	}
 	/**
 	 * Returns a list of deliveries for a single worker
-	 */
+	 *
 	public ArrayList<Delivery> getDeliveryListWorker(int workerID){
 		ArrayList<Delivery> deliveryList = getDeliveryList();
 		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
@@ -318,7 +261,8 @@ public class DBHelper {
 			return null;
 		}
 	}
-
+	**/
+	
 	/**
 	 * Returns the schedule for the worker with the specified worker ID
 	 */
@@ -338,7 +282,6 @@ public class DBHelper {
 	 * Returns info about the delivery with the specified delivery ID
 	 */
 	public Delivery getDelivery(int deliveryID){
-		ArrayList<Delivery> list = new ArrayList<Delivery>();
 		try{
 			ResultSet rs = listDeliveriesStatement.executeQuery();
 			while(rs.next()){
@@ -375,45 +318,24 @@ public class DBHelper {
 	//
 
 	//justin
-	public void addClient(Client client) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+	public void addUser(User user) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		try {
-			addClientStatement.setString(1, client.getName());
-			addClientStatement.setString(2, client.getDefaultAddress());
-			addClientStatement.setString(3, client.getEmail());
-			addClientStatement.setString(4, client.getUsername());
-			addClientStatement.setString(5, hashPassword(client.getPassword()));
-			addClientStatement.executeUpdate();
+			addUserStatement.setString(1, user.getName());
+			addUserStatement.setString(2, user.getEmail());
+			addUserStatement.setString(3,  user.getUsername());
+			addUserStatement.setString(4, hashPassword(user.getPassword()));
+			addUserStatement.setString(5,  user.getClientAddress());
+			addUserStatement.setInt(6, user.getTransportation());
+			addUserStatement.setInt(7, user.getRating());
+			addUserStatement.setInt(8, user.getTotalRatings());
+			addUserStatement.setInt(9, user.getTotalDeliveries());
+			addUserStatement.setInt(10, user.getPendingDeliveries());
+			addUserStatement.setString(11, user.getRole());
+			addUserStatement.executeUpdate();
 		}
 		catch (SQLException sqle){
-			System.out.println("Exception in addClient:" + sqle.getMessage());
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
-		}
-	}
-
-
-	public void addWorker(Worker worker) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		try {
-			addWorkerStatement.setString(1, worker.getName());
-			addWorkerStatement.setString(2, worker.getEmail());
-			addWorkerStatement.setString(3,  worker.getUsername());
-			addWorkerStatement.setString(4, hashPassword(worker.getPassword()));
-			addWorkerStatement.setInt(5, worker.getTransportation());
-			addWorkerStatement.setInt(6, worker.getRating());
-			addWorkerStatement.setInt(7, worker.getTotalRatings());
-			addWorkerStatement.setInt(8, worker.getTotalDeliveries());
-			addWorkerStatement.setInt(9, worker.getPendingDeliveries());
-			addWorkerStatement.setString(10, worker.getRole());
-			addWorkerStatement.executeUpdate();
-		}
-		catch (SQLException sqle){
-			System.out.println("Exception in addWorker:" + sqle.getMessage());
+			System.out.println("Exception in addUser:" + sqle.getMessage());
 		}
 		catch (NoSuchAlgorithmException e)
 		{
@@ -460,7 +382,7 @@ public class DBHelper {
 			addDeliveryStatement.executeUpdate();
 			
 			
-			Worker worker = getWorker(delivery.getWorkerID());
+			User worker = getUser(delivery.getWorkerID());
 			int pending = worker.getPendingDeliveries();
 			changeWorkerPendingDeliveries.setInt(1, pending + 1);
 			changeWorkerPendingDeliveries.setInt(2, worker.getID());
@@ -475,7 +397,7 @@ public class DBHelper {
 		}
 	}
 
-	public void setupClient() throws Exception{
+	public void setupUser() throws Exception{
 		String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
 		String DB_USER = "root";
 		String DB_PASS = "";
@@ -485,34 +407,13 @@ public class DBHelper {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
-			PreparedStatement clearTableStatement = conn.prepareStatement("delete from Client");
+			PreparedStatement clearTableStatement = conn.prepareStatement("delete from User");
 			clearTableStatement.execute();
-			PreparedStatement resetAutoIncrementStatement = conn.prepareStatement("ALTER TABLE Client AUTO_INCREMENT = 1");
+			PreparedStatement resetAutoIncrementStatement = conn.prepareStatement("ALTER TABLE User AUTO_INCREMENT = 1");
 			resetAutoIncrementStatement.executeUpdate();
 		}
 		catch (SQLException sqle) {
-			System.out.println("Exception in setupClient:" + sqle.getMessage());
-		}
-	}
-
-
-	public void setupWorker() throws Exception{
-		String JDBC_URL = "jdbc:mysql://localhost:3306/DawgDashDeliveries";
-		String DB_USER = "root";
-		String DB_PASS = "";
-		//String JDBC_URL = "jdbc:mysql://localhost:3306/TestDawg";
-		//String DB_USER = "athena";
-		//String DB_PASS = "wisdomgoddess";
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
-			PreparedStatement clearTableStatement = conn.prepareStatement("delete from Worker");
-			clearTableStatement.execute();
-			PreparedStatement resetAutoIncrementStatement = conn.prepareStatement("ALTER TABLE Worker AUTO_INCREMENT = 1");
-			resetAutoIncrementStatement.executeUpdate();
-		}
-		catch (SQLException sqle) {
-			System.out.println("Exception in setupWorker:" + sqle.getMessage());
+			System.out.println("Exception in setupUser:" + sqle.getMessage());
 		}
 	}
 
@@ -565,8 +466,7 @@ public class DBHelper {
 	{
 		try
 		{
-			getSpecificWorker.setInt(1, passedWorkerID);
-			ResultSet rsWorker = getSpecificWorker.executeQuery();
+			ResultSet rsWorker = getSpecificUser.executeQuery();
 
 			//int totalDeliveries = 0;
 			int totalRatings = 0;
@@ -642,8 +542,8 @@ public class DBHelper {
 			{
 				int workerID = rsDelivery.getInt("Worker ID");
 				int pending;
-				getSpecificWorker.setInt(1,  workerID);
-				ResultSet rsWorker = getSpecificWorker.executeQuery();
+				getSpecificUser.setInt(1,  workerID);
+				ResultSet rsWorker = getSpecificUser.executeQuery();
 				if(rsWorker.next())
 				{
 					pending = rsDelivery.getInt("Pending Deliveries");
@@ -765,71 +665,19 @@ public class DBHelper {
 	//David Seivitch
 
 	//TODO: If false what do you want to do
-	public void changeClientPassword(int passedClientID, String passedExistingPassword, String passedNewPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
+	public void changeUserPassword(int passedUserID, String passedExistingPassword, String passedNewPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
 	{
 
 		try
 		{
-			String usernameClient;
+			String usernameUser;
 			
-			getSpecificClient.setInt(1, passedClientID);
-			ResultSet rsClient = getSpecificClient.executeQuery();
+			getSpecificUser.setInt(1, passedUserID);
+			ResultSet rsUser = getSpecificUser.executeQuery();
 				
-			if(rsClient.next())
+			if(rsUser.next())
 			{
-				usernameClient = rsClient.getString("Username");
-			}
-			else
-			{
-				System.out.println("ERROR IN CHANGE CLEINT PASSWORD");
-				return;
-			}
-			
-			
-			//Don't hash existing password as it is done in checkIfValidLoginClient
-			if (checkIfValidLoginClient(usernameClient, passedExistingPassword ))
-			{
-				changeClientPassword.setString(1, hashPassword(passedNewPassword));
-				changeClientPassword.setInt(2, passedClientID);
-				changeClientPassword.executeUpdate();
-
-			}
-			else
-			{
-				System.out.println("Invalid Existing Password");
-				return;
-			}
-
-		}
-		catch (SQLException sqle)
-		{
-			System.out.println("ERROR IN CHANGE CLIENT_PASSWORD: " + sqle.getMessage());
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
-		}
-
-	}
-
-	//TODO: If false what do you want to do
-	public void changeWorkerPassword(int passedWorkerID, String passedExistingPassword, String passedNewPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
-	{
-
-		try
-		{
-			String usernameWorker;
-			
-			getSpecificWorker.setInt(1, passedWorkerID);
-			ResultSet rsWorker = getSpecificWorker.executeQuery();
-				
-			if(rsWorker.next())
-			{
-				usernameWorker = rsWorker.getString("Username");
+				usernameUser = rsUser.getString("Username");
 			}
 			else
 			{
@@ -838,11 +686,11 @@ public class DBHelper {
 			}
 			
 			//Don't hash existing password as it is done in checkIfValidLoginClient
-			if(checkIfValidLoginWorker(usernameWorker, passedExistingPassword))
+			if(checkIfValidLogin(usernameUser, passedExistingPassword))
 			{
-				changeWorkerPassword.setString(1, hashPassword(passedNewPassword));
-				changeWorkerPassword.setInt(2, passedWorkerID);
-				changeWorkerPassword.executeUpdate();
+				changeUserPassword.setString(1, hashPassword(passedNewPassword));
+				changeUserPassword.setInt(2, passedUserID);
+				changeUserPassword.executeUpdate();
 			}
 			else
 			{
@@ -904,63 +752,15 @@ public class DBHelper {
 
 	}
 
-	public String checkIfValidLogin(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException, SQLException
-	{
-		try
-		{
-
-			
-			if (checkIfValidLoginWorker(passedUsername, passedPassword))
-			{
-				getWorkerRole.setString(1, passedUsername);
-				ResultSet rsRole = getWorkerRole.executeQuery();
-				if(rsRole.next())
-				{
-
-					String temp = rsRole.getString("Role");
-					System.out.println(temp);
-					temp = temp.toLowerCase();
-					return temp;
-				}
-				else
-				{
-					return "ERROR IN LOGIN: WORKER";
-				}
-			}
-			else if (checkIfValidLoginClient(passedUsername, passedPassword))
-			{
-				return "customer";
-			}
-			else
-			{
-				return "Invalid Username/Password";
-			}
-		}
-		catch (SQLException sqle)
-		{
-			System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_WORKER: " + sqle.getMessage());
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
-		}
-
-		return "ERROR IN CHECK LOGIN";
-	}
-
 	//Called from checkIfValidLogin
-	public boolean checkIfValidLoginWorker(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
+	public boolean checkIfValidLogin(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
 	{
 		try
 		{
 			//First check if user exists
 			String receivedUsername = passedUsername.trim();
-			checkIfUsernameExistsWorker.setString(1, receivedUsername);
-			ResultSet rsCount = checkIfUsernameExistsWorker.executeQuery();
+			checkIfUsernameExists.setString(1, receivedUsername);
+			ResultSet rsCount = checkIfUsernameExists.executeQuery();
 			if(rsCount.next())
 			{
 				int count = rsCount.getInt("COUNT(`Password`)");
@@ -972,8 +772,8 @@ public class DBHelper {
 			}
 
 
-			checkIfValidLoginWorker.setString(1, receivedUsername);
-			ResultSet rsPassword = checkIfValidLoginWorker.executeQuery();
+			checkIfValidLogin.setString(1, receivedUsername);
+			ResultSet rsPassword = checkIfValidLogin.executeQuery();
 
 			String password = null;
 			if(rsPassword.next())
@@ -1014,93 +814,17 @@ public class DBHelper {
 	}
 
 
-	//Called from checkIfValidLogin
-	public boolean checkIfValidLoginClient(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
+	public void changeUserEmail(int passedUserID, String passedEmail)
 	{
 		try
 		{
-			//First check if user exists
-			String receivedName = passedUsername.trim();
-			checkIfUsernameExistsClient.setString(1, receivedName);
-			ResultSet rsCount = checkIfUsernameExistsClient.executeQuery();
-			if(rsCount.next())
-			{
-				int count = rsCount.getInt("COUNT(`Password`)");
-				if (count == 0)
-				{
-					System.out.println("BAD NAME");
-					return false;
-				}
-			}
-
-
-			checkIfValidLoginClient.setString(1, receivedName);
-			ResultSet rsPassword = checkIfValidLoginClient.executeQuery();
-			String password = null;
-
-			if(rsPassword.next())
-			{
-				password = rsPassword.getString("Password");
-			}
-
-			String receivedPassword = hashPassword(passedPassword.trim());
-			if (password.equals(receivedPassword))
-			{
-				return true;
-			}
-			else
-			{
-				System.out.println("BAD PASSWORD");
-				return false;
-			}
-
-
+			changeUserEmail.setString(1, passedEmail);
+			changeUserEmail.setInt(2, passedUserID);
+			changeUserEmail.executeUpdate();
 		}
 		catch (SQLException sqle)
 		{
-			System.out.println("ERROR IN CHECK_IF_VALID_LOGIN_CLIENT: " + sqle.getMessage());
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ALGORITHM:" + e.getMessage());
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			System.out.println("ERROR IN HASH_PASSWORD INVAILD ENCODING:" + e.getMessage());
-		}
-
-		System.out.println("Username/Password Invalid:");
-		return false;
-
-	}
-
-	
-	public void changeClientEmail(int passedClientID, String passedEmail)
-	{
-		try
-		{
-			
-			changeClientEmail.setString(1, passedEmail);
-			changeClientEmail.setInt(2, passedClientID);
-			changeClientEmail.executeUpdate();
-		}
-		catch (SQLException sqle)
-		{
-			System.out.println("ERROR IN CHANGE CLIENT_EMAIL: " + sqle.getMessage());
-		}
-	}
-
-	public void changeWorkerEmail(int passedClientID, String passedEmail)
-	{
-		try
-		{
-			changeWorkerEmail.setString(1, passedEmail);
-			changeWorkerEmail.setInt(2, passedClientID);
-			changeWorkerEmail.executeUpdate();
-		}
-		catch (SQLException sqle)
-		{
-			System.out.println("ERROR IN CHANGE WORKER_EMAIL: " + sqle.getMessage());
+			System.out.println("ERROR IN CHANGE USER_EMAIL: " + sqle.getMessage());
 		}
 	}
 
@@ -1133,33 +857,19 @@ public class DBHelper {
 		}
 	}
 
+
 	//TODO: Might be a bad idea, as we would lose archive information, might want to do something with the entity
-	public void removeClient(int passedClientID)
+	public void removeUser(int passedUserID)
 	{
 
 		try
 		{
-			removeClient.setInt(1,passedClientID);
-			removeClient.executeUpdate();
+			removeUser.setInt(1,passedUserID);
+			removeUser.executeUpdate();
 		}
 		catch (SQLException sqle)
 		{
-			System.out.println("ERROR IN DELETE CLIENT: " + sqle.getMessage());
-		}
-	}
-
-	//TODO: Might be a bad idea, as we would lose archive information, might want to do something with the entity
-	public void removeWorker(int passedWorkerID)
-	{
-
-		try
-		{
-			removeWorker.setInt(1,passedWorkerID);
-			removeWorker.executeUpdate();
-		}
-		catch (SQLException sqle)
-		{
-			System.out.println("ERROR IN DELETE WORKER: " + sqle.getMessage());
+			System.out.println("ERROR IN DELETE USER: " + sqle.getMessage());
 		}
 	}
 
