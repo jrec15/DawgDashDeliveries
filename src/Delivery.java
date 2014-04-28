@@ -36,7 +36,7 @@ public class Delivery {
 		workerComment = "None";
 		this.clientComment = clientComment;
 		Date date = new Date();
-		timeCompleted = new Timestamp(date.getTime()); //Not sure what to do with timeCompleted here
+		timeCompleted = new Timestamp(date.getTime()); //TODO: Change to 00:00, as not finished, Not sure what to do with timeCompleted here
 		duration = 30;
 		price = 30;
 		this.transportation = transportation;
