@@ -17,7 +17,6 @@ public class DBHelperTest extends DBHelper {
 		super.setupWorker();
 		super.setupSchedule();
 		super.setupDelivery();
-		super.setupEstimate();
 	}
 	
 	@Test
@@ -30,13 +29,12 @@ public class DBHelperTest extends DBHelper {
     	assertNotNull("prepared statement should exist", helper.addClientStatement);
     	assertNotNull("prepared statement should exist", helper.addWorkerStatement);
     	assertNotNull("prepared statement should exist", helper.setScheduleStatement);
-    	assertNotNull("prepared statement should exist", helper.giveEstimateStatement);
+    	assertNotNull("prepared statement should exist", helper.addDeliveryStatement);
     	
     	assertNotNull("prepared statement should exist", helper.listClientsStatement);
     	assertNotNull("prepared statement should exist", helper.listWorkersStatement);
     	assertNotNull("prepared statement should exist", helper.listSchedulesStatement);
     	assertNotNull("prepared statement should exist", helper.listDeliveriesStatement);
-    	assertNotNull("prepared statement should exist", helper.listEstimatesStatement);
     	
     	assertNotNull("prepared statement should exist", helper.changeWorkerEmail);
     	assertNotNull("prepared statement should exist", helper.changeClientEmail);

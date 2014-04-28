@@ -70,8 +70,9 @@ public class Worker {
 		this.totalDeliveries = totalDeliveries;
 		this.pendingDeliveries = pendingDeliveries;
 		this.role = role;
-		DBHelper instance = new DBHelper();
-		deliveryList = instance.getDeliveryListWorker(ID);
+		//DBHelper instance = new DBHelper();
+		//deliveryList = instance.getDeliveryListWorker(ID);
+		//TODO: ADD BACK LATER
 	}
 	
 	public ArrayList<Delivery> getDeliveryList() {

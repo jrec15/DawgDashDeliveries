@@ -1,8 +1,11 @@
 //package dawgdashdeliveries;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
-class Delivery {
+import java.util.Date;
+
+public class Delivery {
 	private int ID;
 	private int clientID;
 	private int workerID;
@@ -21,8 +24,7 @@ class Delivery {
 	 * NOTE: This is only set to work for ASAP right now. To do a pickup time we would need that as a variable,
 	 * which we did not originally establish.
 	 * @param estimateID
-	 * @param clientComment Any comments the client has about the delivery (not sure if this
-	 * is what we had planned for this or not)
+	 * @param clientComment Any comments the client has about the delivery
 	 * @throws Exception 
 	 */
 	public Delivery(int clientID, String clientComment, 
@@ -33,195 +35,325 @@ class Delivery {
 		rating = 0; // I'm thinking 0 represents no rating received. 1-5 represent an actual rating given
 		workerComment = "None";
 		this.clientComment = clientComment;
-		timeCompleted = null; //Not sure what to do with timeCompleted here
+		Date date = new Date();
+		timeCompleted = new Timestamp(date.getTime()); //Not sure what to do with timeCompleted here
 		duration = 30;
 		price = 30;
 		this.transportation = transportation;
 		this.sourceAddress = sourceAddress;
 		this.destinationAddress = destinationAddress;
 		
-		int maxRating = -1;
 		Worker bestWorker = null;
+		int minutesLeft;
+		int minPending = 100;
+		int maxRating = -1;
 		DBHelper instance = new DBHelper();		
 		for (Worker worker : instance.getWorkerList()) {
 			 Schedule schedule = instance.getSchedule(worker.getID());
-			 switch (Calendar.DAY_OF_WEEK) {
+			 Calendar calendar = Calendar.getInstance();
+			 int day = calendar.get(Calendar.DAY_OF_WEEK);
+			 switch (day) {
 				 case (1) : String[] sunday = schedule.getSunday().split("-");
-				 			if (Integer.parseInt(sunday[0]) <= Calendar.HOUR_OF_DAY) {
+				 			if (Integer.parseInt(sunday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
-				 				if (Integer.parseInt(sunday[0]) == Calendar.HOUR_OF_DAY) {
+				 				if (Integer.parseInt(sunday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 					check = false;
-				 					if (Integer.parseInt(sunday[1]) <= Calendar.MINUTE) 
+				 					if (Integer.parseInt(sunday[1]) <= (calendar.get(Calendar.MINUTE))) 
 				 						check = true;
-					 				if (check == true) {
-						 				if (Integer.parseInt(sunday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					//NOTE: remember to update schedule at the end since worker is now on a job. This is
-						 					//very tricky ATM since I don't have minutes and we aren't calculating duration
-						 					if (Integer.parseInt(sunday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-						 						//This would mean a worker with 1 min left in schedule could be assigned
-						 						//a job. Let's stick to 15 or 30 min intervals to avoid this dilemma. 
-						 						if (Integer.parseInt(sunday[3]) > Calendar.MINUTE)
-						 							check = true;
-						 						if (check == true) {
-						 							if (worker.getRating() > maxRating) {
-						 								bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
+				 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(sunday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(sunday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(sunday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(sunday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(sunday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
 					 				}
 				 				}
 				 			}
 				 			break;
-				 case (2) : String[] monday = schedule.getMonday().split("-");
-							if (Integer.parseInt(monday[0]) <= Calendar.HOUR_OF_DAY) {
-								boolean check = true;
-				 				if (Integer.parseInt(monday[0]) == Calendar.HOUR_OF_DAY) {
-					 				check = false;
-					 				if (Integer.parseInt(monday[1]) <= Calendar.MINUTE) 
-					 					check = true;
-						 			if (check == true) {
-						 				if (Integer.parseInt(monday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					if (Integer.parseInt(monday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-							 					if (Integer.parseInt(monday[3]) > Calendar.MINUTE)
-							 						check = true;
-							 					if (check == true) {
-							 						if (worker.getRating() > maxRating) {
-														bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
+				 case (2) : String[] monday = schedule.getSunday().split("-");
+				 			if (Integer.parseInt(monday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 				boolean check = true;
+				 				if (Integer.parseInt(monday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 					check = false;
+				 					if (Integer.parseInt(monday[1]) <= (calendar.get(Calendar.MINUTE))) 
+				 						check = true;
+				 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(monday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(monday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(monday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(monday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(monday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
 					 				}
 				 				}
 				 			}
 				 			break;
-				 case (3) : String[] tuesday = schedule.getTuesday().split("-");
-							if (Integer.parseInt(tuesday[0]) <= Calendar.HOUR_OF_DAY) {
-								boolean check = true;
-				 				if (Integer.parseInt(tuesday[0]) == Calendar.HOUR_OF_DAY) {
-				 					check = false;
-				 					if (Integer.parseInt(tuesday[1]) <= Calendar.MINUTE) 
-				 						check = true;
-					 				if (check == true) {
-						 				if (Integer.parseInt(tuesday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					if (Integer.parseInt(tuesday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-						 						if (Integer.parseInt(tuesday[3]) > Calendar.MINUTE)
-						 							check = true;
-						 						if (check == true) {
-						 							if (worker.getRating() > maxRating) {
-						 								bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
-					 				}
-				 				}
-				 			}
-		 					break;
-				 case (4) : String[] wednesday = schedule.getWednesday().split("-");
-							if (Integer.parseInt(wednesday[0]) <= Calendar.HOUR_OF_DAY) {
-								boolean check = true;
-				 				if (Integer.parseInt(wednesday[0]) == Calendar.HOUR_OF_DAY) {
-				 					check = false;
-				 					if (Integer.parseInt(wednesday[1]) <= Calendar.MINUTE) 
-				 						check = true;
-					 				if (check == true) {
-						 				if (Integer.parseInt(wednesday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					if (Integer.parseInt(wednesday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-						 						if (Integer.parseInt(wednesday[3]) > Calendar.MINUTE)
-						 							check = true;
-						 						if (check == true) {
-						 							if (worker.getRating() > maxRating) {
-						 								bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
-					 				}
-				 				}
-					 		}
-		 					break;
-				 case (5) : String[] thursday = schedule.getThursday().split("-");
-						 	if (Integer.parseInt(thursday[0]) <= Calendar.HOUR_OF_DAY) {
-						 		boolean check = true;
-				 				if (Integer.parseInt(thursday[0]) == Calendar.HOUR_OF_DAY) {
-				 					check = false;
-				 					if (Integer.parseInt(thursday[1]) <= Calendar.MINUTE) 
-				 						check = true;
-					 				if (check == true) {
-						 				if (Integer.parseInt(thursday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					if (Integer.parseInt(thursday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-						 						if (Integer.parseInt(thursday[3]) > Calendar.MINUTE)
-						 							check = true;
-						 						if (check == true) {
-						 							if (worker.getRating() > maxRating) {
-						 								bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
-					 				}
-				 				}
-				 			}
-		 					break;
-				 case (6) : String[] friday = schedule.getFriday().split("-");
-				 			if (Integer.parseInt(friday[0]) <= Calendar.HOUR_OF_DAY) {
+				 case (3) : String[] tuesday = schedule.getSunday().split("-");
+				 			if (Integer.parseInt(tuesday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
-				 				if (Integer.parseInt(friday[0]) == Calendar.HOUR_OF_DAY) {
+				 				if (Integer.parseInt(tuesday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 					check = false;
-				 					if (Integer.parseInt(friday[1]) <= Calendar.MINUTE) 
+				 					if (Integer.parseInt(tuesday[1]) <= (calendar.get(Calendar.MINUTE))) 
 				 						check = true;
-					 				if (check == true) {
-						 				if (Integer.parseInt(friday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					if (Integer.parseInt(friday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-						 						if (Integer.parseInt(friday[3]) > Calendar.MINUTE)
-						 							check = true;
-						 						if (check == true) {
-						 							if (worker.getRating() > maxRating) {
-						 								bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
-					 				}
 				 				}
-					 		}
-		 					break;
-				 case (7) : String[] saturday = schedule.getSaturday().split("-");
-				 			if (Integer.parseInt(saturday[0]) <= Calendar.HOUR_OF_DAY) {
-				 				boolean check = true;
-				 				if (Integer.parseInt(saturday[0]) == Calendar.HOUR_OF_DAY) {
-				 					check = false;
-				 					if (Integer.parseInt(saturday[1]) <= Calendar.MINUTE) 
-				 						check = true;
-					 				if (check == true) {
-						 				if (Integer.parseInt(saturday[2]) >= Calendar.HOUR_OF_DAY) {
-						 					if (Integer.parseInt(saturday[2]) == Calendar.HOUR_OF_DAY) {
-						 						check = false;
-						 						if (Integer.parseInt(saturday[3]) > Calendar.MINUTE)
-						 							check = true;
-						 						if (check == true) {
-						 							if (worker.getRating() > maxRating) {
-						 								bestWorker = worker;
-						 							}
-						 						}
-						 					}
-						 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(tuesday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(tuesday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(tuesday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(tuesday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(tuesday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
 					 				}
 				 				}
 				 			}
-		 					break;
+				 			break;
+				 case (4) : String[] wednesday = schedule.getSunday().split("-");
+				 			if (Integer.parseInt(wednesday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 				boolean check = true;
+				 				if (Integer.parseInt(wednesday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 					check = false;
+				 					if (Integer.parseInt(wednesday[1]) <= (calendar.get(Calendar.MINUTE))) 
+				 						check = true;
+				 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(wednesday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(wednesday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(wednesday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(wednesday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(wednesday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
+					 				}
+				 				}
+				 			}
+				 			break;
+				 case (5) : String[] thursday = schedule.getSunday().split("-");
+				 			if (Integer.parseInt(thursday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 				boolean check = true;
+				 				if (Integer.parseInt(thursday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 					check = false;
+				 					if (Integer.parseInt(thursday[1]) <= (calendar.get(Calendar.MINUTE))) 
+				 						check = true;
+				 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(thursday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(thursday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(thursday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(thursday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(thursday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
+					 				}
+				 				}
+				 			}
+				 			break;
+				 case (6) : String[] friday = schedule.getSunday().split("-");
+				 			if (Integer.parseInt(friday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 				boolean check = true;
+				 				if (Integer.parseInt(friday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 					check = false;
+				 					if (Integer.parseInt(friday[1]) <= (calendar.get(Calendar.MINUTE))) 
+				 						check = true;
+				 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(friday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(friday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(friday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(friday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(friday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
+					 				}
+				 				}
+				 			}
+				 			break;
+				 case (7) : String[] saturday = schedule.getSunday().split("-");
+				 			if (Integer.parseInt(saturday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 				boolean check = true;
+				 				if (Integer.parseInt(saturday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+				 					check = false;
+				 					if (Integer.parseInt(saturday[1]) <= (calendar.get(Calendar.MINUTE))) 
+				 						check = true;
+				 				}
+				 				if (check == true) {
+					 				if (Integer.parseInt(saturday[2]) >= (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 					if (Integer.parseInt(saturday[2]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
+					 						check = false;
+					 						minutesLeft = Integer.parseInt(saturday[3]) - (calendar.get(Calendar.MINUTE));
+					 						if (Integer.parseInt(saturday[3]) > (calendar.get(Calendar.MINUTE)))
+					 							check = true;
+					 					}
+					 					else
+					 						minutesLeft = 60*(Integer.parseInt(saturday[2])) - 60*(calendar.get(Calendar.HOUR_OF_DAY))
+					 							- (calendar.get(Calendar.MINUTE));
+					 					if (check == true) {
+					 						if (minutesLeft >= 30) {
+					 							if (worker.getTransportation() >= transportation) {
+					 								if (worker.getPendingDeliveries() <= minPending) {
+					 									if (worker.getPendingDeliveries() < minPending) {
+					 										minPending = worker.getPendingDeliveries();
+					 										maxRating = worker.getRating();
+					 										bestWorker = worker;
+					 									}
+					 									if (worker.getPendingDeliveries() == minPending) {
+					 										if (worker.getRating() > maxRating) {
+					 											maxRating = worker.getRating();
+					 											bestWorker = worker;
+					 										}
+					 									}
+					 								}
+					 							}
+					 						}
+					 					}
+					 				}
+				 				}
+				 			}
+				 			break;
 			 }
 		}
-		if (bestWorker != null)
+		if (bestWorker != null) {
 			workerID = bestWorker.getID();
+		}
+		else
+			workerID = 1;
 		
 	}
 	
@@ -269,14 +401,6 @@ class Delivery {
 		ID = iD;
 	}
 
-	public int getEstimateID() {
-		return estimateID;
-	}
-
-	public void setEstimateID(int estimateID) {
-		this.estimateID = estimateID;
-	}
-
 	public int getWorkerID() {
 		return workerID;
 	}
@@ -291,14 +415,6 @@ class Delivery {
 
 	public void setDeliveryStatus(String deliveryStatus) {
 		this.deliveryStatus = deliveryStatus;
-	}
-
-	public String getPaymentStatus() {
-		return paymentStatus;
-	}
-
-	public void setPaymentStatus(String paymentStatus) {
-		this.paymentStatus = paymentStatus;
 	}
 
 	public int getRating() {
