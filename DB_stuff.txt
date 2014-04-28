@@ -1,0 +1,63 @@
+User:
+	id
+	name
+	loginId
+	email
+	password
+	role
+	defaultAddress
+	transportation
+
+Delivery:
+	id
+	clientId
+	workerId
+	origin
+	destination
+	specialInstructions
+	clientComment
+	workerComment
+	pickupTime
+	deliveryTime
+	price
+	deliveryStatus
+
+Schedule:
+	id
+	name
+	<sun-sat schedules>
+
+
+DBHelper methods:
+	ArrayList<User> getWorkers()
+	ArrayList<User> getAllUsers()
+	ArrayList<Delivery> getPendingWorkerDeliveriesFor(int id)
+	Schedule getScheduleForId(workerId)
+	String attemptLogin(String loginId, String password)
+	User getUser(int userId)
+	String getPasswordFor(int userId)
+	String hash(String password)
+	void updatePassword(int userId, String password)
+	boolean availableEmail(String email)
+	boolean availableUsername(String username)
+	void createWorker(String name, String email, String username, String password, int transportation)
+	void createCustomer(String name, String email, String username, String password, String defaultAddress)
+	void changePassword(int id, String password)
+	void updateEmail(int id, String email)
+	void updateAddress(int id, String address)
+	void updateTransportation(int id, int transportation)
+	void updateSchedule(int id, String[] schedule)
+	Delivery getDelivery(int deliveryId)
+	void makeAllDeliveriesInProgess(int id)
+	ArrayList<Delivery> getPendingCustomerDeliveriesFor(int id)
+	void cancelDelivery(int id)
+	ArrayList<Delivery> getPreviousCustomerDeliveriesFor(int id)
+	String getDefaultAddress(int id)
+	void scheduleDelivery(int clientId, String pickupAddress, String destinationAddress, int quantity, int size, String description, String instructions, String pickupTime)
+	void addWorkerComment(int id, String comment)
+	void markUncompletable(int id)
+
+
+admin
+worker
+customer
