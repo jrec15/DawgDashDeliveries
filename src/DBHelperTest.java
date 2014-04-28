@@ -1,6 +1,8 @@
 //package dawgdashdeliveries;
 
 import static org.junit.Assert.*;
+
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 import org.junit.Before;
@@ -17,10 +19,7 @@ public class DBHelperTest extends DBHelper {
 		super.setupWorker();
 		super.setupSchedule();
 		super.setupDelivery();
-<<<<<<< HEAD
-		
-=======
->>>>>>> fe73e35f4c49386692edc060ab4bf933b3bd79f3
+
 	}
 	
 	@Test
@@ -34,28 +33,22 @@ public class DBHelperTest extends DBHelper {
     	assertNotNull("prepared statement should exist", helper.addWorkerStatement);
     	assertNotNull("prepared statement should exist", helper.setScheduleStatement);
     	assertNotNull("prepared statement should exist", helper.addDeliveryStatement);
-<<<<<<< HEAD
-    	
-=======
->>>>>>> fe73e35f4c49386692edc060ab4bf933b3bd79f3
+
     	
     	assertNotNull("prepared statement should exist", helper.listClientsStatement);
     	assertNotNull("prepared statement should exist", helper.listWorkersStatement);
     	assertNotNull("prepared statement should exist", helper.listSchedulesStatement);
     	assertNotNull("prepared statement should exist", helper.listDeliveriesStatement);
-<<<<<<< HEAD
     	
     	
     	assertNotNull("prepared statement should exist", helper.changeDeliveryStatus); 
-    	
     	assertNotNull("prepared statement should exist", helper.changeWorkerComment); 
     	assertNotNull("prepared statement should exist", helper.changeTimeCompleted); 
     	assertNotNull("prepared statement should exist", helper.changeWorkerForDelivery); 
 
     	assertNotNull("prepared statement should exist", helper.changeRatingWorker);
     	assertNotNull("prepared statement should exist", helper.changeRatingDelivery);
-=======
->>>>>>> fe73e35f4c49386692edc060ab4bf933b3bd79f3
+    	assertNotNull("prepared statement should exist", helper.changeWorkerPendingDeliveries);
     	
     	assertNotNull("prepared statement should exist", helper.changeWorkerEmail);
     	assertNotNull("prepared statement should exist", helper.changeClientEmail);
@@ -71,6 +64,10 @@ public class DBHelperTest extends DBHelper {
     	assertNotNull("prepared statement should exist", helper.checkIfUsernameExistsClient);
     	assertNotNull("prepared statement should exist", helper.getWorkerRole);
 	
+    	assertNotNull("prepared statement should exist", helper.getSpecificDelivery);
+    	assertNotNull("prepared statement should exist", helper.getSpecificClient);
+    	assertNotNull("prepared statement should exist", helper.getSpecificWorker);
+    	assertNotNull("prepared statement should exist", helper.updateTotalRatings);
 	}
 	
 	@Test
@@ -120,8 +117,8 @@ public class DBHelperTest extends DBHelper {
      	
      	//Checking if changes in information are correct
      	
-     	instance.changeClientPassword("dss", "password", "hellokittY" );
-     	instance.changeClientEmail("thisIsNew@gmail.com", "newWorld");
+     	instance.changeClientPassword(1, "password", "hellokittY" );
+     	instance.changeClientEmail(3, "thisIsNew@gmail.com");
      	
      	
      	clientTestList= instance.getClientList();
@@ -129,11 +126,7 @@ public class DBHelperTest extends DBHelper {
      	
      	assertEquals("Client 3 email","thisIsNew@gmail.com",clientTestList.get(2).getEmail());
      	assertEquals("Client 1 password","eab785fc596b7aa2d24d5a6a438b74ac",clientTestList.get(0).getPassword());
-     	
-  
-     	
-     	
-	
+    
 	}
 	
 	
@@ -197,24 +190,23 @@ public class DBHelperTest extends DBHelper {
      	
      	
      	//Checking when we change worker information 
-     	instance.changeWorkerPassword("killJerry", "never", "helloNewPassword");
-     	instance.changeWorkerEmail("golden@gmail.com", "tenFoot");
-     	instance.changeWorkerTransportation(1, "tenFoot");
+     	instance.changeWorkerPassword(4, "never", "helloNewPassword");
+     	instance.changeWorkerEmail(3,"golden@gmail.com");
+     	instance.changeWorkerTransportation(3, 1);
      	
      	//changeRating with zero ratings so far
-     	instance.changeRatingWorker(5, "tenFoot");
+     	instance.changeRatingWorker(3, 5);
      	
      	//changeRating with zero, the add another rating
-     	instance.changeRatingWorker(3, "killJerry");
-     	instance.changeRatingWorker(5, "killJerry");
+     	instance.changeRatingWorker(4, 3);
+     	instance.changeRatingWorker(4, 5);
      	
      	workerTestList= instance.getWorkerList();
      	assertEquals("Worekrs in list",4, workerTestList.size());
      	
-	    
+     	assertEquals("Worker 4 password","3ed658947f0715d56ed555b172ac0b3b",workerTestList.get(3).getPassword());
 	    assertEquals("Worker 3 email","golden@gmail.com",workerTestList.get(2).getEmail());
-	    assertEquals("Worker 4 password","3ed658947f0715d56ed555b172ac0b3b",workerTestList.get(3).getPassword());
-     	assertEquals("Worker 3 transportation", 1, workerTestList.get(2).getTransportation());
+	    assertEquals("Worker 3 transportation", 1, workerTestList.get(2).getTransportation());
      	
      	assertEquals("Worker 3 rating is", 5, workerTestList.get(2).getRating());
      	assertEquals("Worker 3 total ratings", 1, workerTestList.get(2).getTotalRatings());
@@ -222,10 +214,7 @@ public class DBHelperTest extends DBHelper {
      	assertEquals("Worker 4 rating is", 4, workerTestList.get(3).getRating());
      	assertEquals("Worker 4 total ratings", 2, workerTestList.get(3).getTotalRatings());
      	
-     	
-     	
-     	
-	}
+    }
 	
 	@Test
 	public void testCheckIfValidLoginWorker() throws Exception{
