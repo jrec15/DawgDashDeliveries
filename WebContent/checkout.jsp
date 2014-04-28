@@ -11,7 +11,7 @@
 		<p>Price: ${price}</p>
 		<form action="Delivery" method="POST">
 			<input type="hidden" name="task" value="SUBMIT_PAYMENT" />
-			<input type="hidden" name="user_id" value="${client.iD}"/>
+			<input type="hidden" name="user_id" value="${user.iD}"/>
 			Credit card number: <input type="text" name="credit_card" />
 			Billing address: <input type="text" name="billing_address" />
 			<input type="submit" value="Submit payment" />

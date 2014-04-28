@@ -34,7 +34,7 @@
 							<td>
 								<form action="Delivery" method="POST">
 									<input type="hidden" name ="task" value="CANCEL_DELIVERY" />
-									<input type="hidden" value="${delivery.iD}" />
+									<input type="hidden" name = "delivery_id" value="${delivery.iD}" />
 									<input type="submit" value="Cancel delivery" />
 								</form>
 							</td>

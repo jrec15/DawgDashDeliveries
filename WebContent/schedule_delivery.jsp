@@ -24,6 +24,7 @@
 				<option value="large">Large package</option>
 			</select><br>
 			Brief description: <input type="text" name="description" /><br>
+			Special instructions: <input type="text" name="instructions" /><br>
 			Pick-up time:
 			<select name="time">
 				<option value="none">Select below...</option>

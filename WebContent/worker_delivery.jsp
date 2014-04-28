@@ -9,6 +9,9 @@
 	<body>
 		<h1>Delivery ${delivery.iD}</h1>
 		<h3>Add a comment:</h3>
+			<c:if test="${not empty error}">
+				${error}
+			</c:if>
 			<form action="Delivery" method="POST">
 				<input type="hidden" name="task" value="WORKER_COMMENT_DELIVERY" />
 				<input type="hidden" name="delivery_id" value="${delivery.iD}" />
