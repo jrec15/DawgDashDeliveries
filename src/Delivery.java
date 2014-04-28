@@ -81,7 +81,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -95,7 +95,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (2) : String[] monday = schedule.getSunday().split("-");
+				 case (2) : String[] monday = schedule.getMonday().split("-");
 				 			if (Integer.parseInt(monday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(monday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -123,7 +123,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -137,7 +137,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (3) : String[] tuesday = schedule.getSunday().split("-");
+				 case (3) : String[] tuesday = schedule.getTuesday().split("-");
 				 			if (Integer.parseInt(tuesday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(tuesday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -165,7 +165,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -179,7 +179,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (4) : String[] wednesday = schedule.getSunday().split("-");
+				 case (4) : String[] wednesday = schedule.getWednesday().split("-");
 				 			if (Integer.parseInt(wednesday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(wednesday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -207,7 +207,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -221,7 +221,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (5) : String[] thursday = schedule.getSunday().split("-");
+				 case (5) : String[] thursday = schedule.getThursday().split("-");
 				 			if (Integer.parseInt(thursday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(thursday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -249,7 +249,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -263,7 +263,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (6) : String[] friday = schedule.getSunday().split("-");
+				 case (6) : String[] friday = schedule.getFriday().split("-");
 				 			if (Integer.parseInt(friday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(friday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -291,7 +291,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -305,7 +305,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (7) : String[] saturday = schedule.getSunday().split("-");
+				 case (7) : String[] saturday = schedule.getSaturday().split("-");
 				 			if (Integer.parseInt(saturday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(saturday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -333,7 +333,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -353,7 +353,7 @@ public class Delivery {
 			workerID = bestWorker.getID();
 		}
 		else
-			workerID = 1;
+			workerID = 0;
 		
 	}
 	

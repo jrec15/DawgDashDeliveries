@@ -57,6 +57,7 @@ public class DeliveryTest {
 		Schedule schedule2 = new Schedule(2, "08-15-13-30", "01-00-00-00", "09-15-15-30", "08-00-13-00", "12-00-16-00", "08-00-12-00", "13-00-18-00");
 		Schedule schedule3 = new Schedule(3, "10-00-24-00", "01-00-24-00", "00-00-00-00", "13-20-18-00", "09-00-13-00", "10-15-13-15", "08-00-13-30");
 		Schedule schedule4 = new Schedule(4, "15-00-24-00", "01-00-24-00", "13-15-18-00", "00-00-00-00", "13-00-18-00", "00-00-00-00", "10-00-14-00");
+
 		instance.setSchedule(schedule1);
 		instance.setSchedule(schedule2);
 		instance.setSchedule(schedule3);
