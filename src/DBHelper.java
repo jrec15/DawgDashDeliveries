@@ -16,22 +16,25 @@ public class DBHelper {
 	protected PreparedStatement addClientStatement;
 	protected PreparedStatement addWorkerStatement;
 	protected PreparedStatement setScheduleStatement;
-	protected PreparedStatement giveEstimateStatement;
 	protected PreparedStatement addDeliveryStatement;
 	
     protected PreparedStatement listClientsStatement;
 	protected PreparedStatement listWorkersStatement;
 	protected PreparedStatement listSchedulesStatement;
 	protected PreparedStatement listDeliveriesStatement;
-	protected PreparedStatement listEstimatesStatement;
+	
     
 	protected PreparedStatement changeDeliveryStatus;
-	protected PreparedStatement changeRating;
+	
 	protected PreparedStatement changeWorkerComment;
 	protected PreparedStatement changeTimeCompleted;
 	protected PreparedStatement changeWorkerForDelivery;
 	
-    protected PreparedStatement changeWorkerEmail;
+	protected PreparedStatement changeRatingWorker;
+	protected PreparedStatement changeRatingDelivery;
+	
+	
+	protected PreparedStatement changeWorkerEmail;
 	protected PreparedStatement changeClientEmail;
 	protected PreparedStatement changeDefaultAddress;
     protected PreparedStatement changeClientPassword;
@@ -45,6 +48,9 @@ public class DBHelper {
     protected PreparedStatement checkIfUsernameExistsClient;
     protected PreparedStatement getWorkerRole;
     
+    protected PreparedStatement getSpecificWorker;
+    protected PreparedStatement updateTotalRatings;
+    
 	public DBHelper() throws Exception {
 		//Might need to change to match your info
 		
@@ -57,6 +63,8 @@ public class DBHelper {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
+			
+			
 			//add prepared statements here
 			addClientStatement = conn.prepareStatement("INSERT INTO Client (Name, `Default "
 					+ "Address`, Email, Username, Password) VALUES (?, ?, ?, ?, ?)");
@@ -68,10 +76,11 @@ public class DBHelper {
 			addDeliveryStatement = conn.prepareStatement("INSERT INTO Delivery (`Client ID`, `Worker ID`, `Delivery Status`,"
 					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed`, Duration, Price, Transportation, "
 					+ "`Source Address, `Destination Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-			//giveEstimateStatement = conn.prepareStatement("INSERT INTO Estimate (`Client ID`, Duration, "
-					//+ "Price, Transportation, `Source Address`, `Destination Address`) VALUES (?, ?, ?, ?, ?, ?)");
 			
-            listClientsStatement = conn.prepareStatement("select ID, Name, `Default Address`, Email, Username, Password from Client");
+			
+            
+			
+			listClientsStatement = conn.prepareStatement("select ID, Name, `Default Address`, Email, Username, Password from Client");
 			listWorkersStatement = conn.prepareStatement("select ID, Name, Email, Username, Password, Transportation, Rating, "
 					+ "`Total Ratings`, `Total Deliveries`, `Pending Deliveries`, Role from Worker");
 			listSchedulesStatement = conn.prepareStatement("select `Worker ID`, Sunday, Monday, Tuesday, Wednesday, Thursday, "
@@ -79,16 +88,21 @@ public class DBHelper {
 			listDeliveriesStatement = conn.prepareStatement("select ID, `Client ID`, `Worker ID`, `Delivery Status`, "
 					+ "Rating, `Worker Comment`, `Client Comment`, `Time Completed`, Duration, Price, Transportation,"
 					+ "`Source Address`, `Destination Address` from Delivery");
-			//listEstimatesStatement = conn.prepareStatement("select `Client ID`, Duration, Price, Transportation, `Source Address`, `Destination Address` from Estimate");
-            
 			
+			
+			
+			//Justin in delivery test
 			changeDeliveryStatus = conn.prepareStatement("UPDATE `Delivery` SET `Delivery Status` WHERE ID = ?");
-			changeRating = conn.prepareStatement("UPDATE `Delivery` SET `Rating` WHERE ID = ?");
-			changeWorkerComment = conn.prepareStatement("UPDATE `Delivery` SET `Worker Comment` WHERE ID = ?");
+			changeWorkerComment = conn.prepareStatement("UPDATE `Delivery` SET `Worker Comment` WHERE `ID` = ?");
 			changeTimeCompleted = conn.prepareStatement("UPDATE `Delivery` SET `Time Completed` WHERE ID = ?");
 			changeWorkerForDelivery = conn.prepareStatement("UPDATE `Delivery` Set `Worker ID` WHERE ID = ?");
 			
-            changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `Username` = ?");
+			//Justin in delivery test
+			changeRatingDelivery = conn.prepareStatement("UPDATE `Delivery` SET `Rating` = ? WHERE `ID` = ?");
+			
+			changeRatingWorker = conn.prepareStatement("UPDATE `Worker` SET `Rating` = ? WHERE `Username` = ?");
+			
+			changeClientEmail = conn.prepareStatement("UPDATE `Client` SET `Email` = ? WHERE `Username` = ?");
             changeWorkerEmail = conn.prepareStatement("UPDATE `Worker` SET `Email` = ? WHERE `Username` = ?");
             changeWorkerTransportation = conn.prepareStatement("UPDATE `Worker` SET `Transportation` = ? WHERE `Username` = ?");
             changeDefaultAddress = conn.prepareStatement("UPDATE `Client` SET `Default Address` = ? WHERE `Username` = ?");
@@ -102,6 +116,8 @@ public class DBHelper {
             checkIfUsernameExistsClient = conn.prepareStatement("SELECT COUNT(`Password`) FROM `Client` WHERE `Username` = ?");
             getWorkerRole = conn.prepareStatement("SELECT `Role` FROM `Worker` WHERE `Username` = ?");		
             
+            getSpecificWorker = conn.prepareStatement("SELECT * FROM `Worker` WHERE `Username` = ?");
+            updateTotalRatings = conn.prepareStatement("UPDATE `Worker` SET `Total Ratings` = ? WHERE `Username` = ?");
 		}
 		catch (SQLException sqle) {
 			System.out.println("Exception in Constructor:" + sqle.getMessage());
@@ -566,13 +582,55 @@ public class DBHelper {
 	            System.out.println("ERROR IN CHANGE DELIVERY STATUS: " + sqle.getMessage());
 	        }
 	    }
-		
-		public void changeRating(int rating)
+		//TODO: add totaldeliveries to formula, to account for 1 rating out-weighing other proven workers 
+		public void changeRatingWorker(int passedRating, String passedUsernameWorker)
 	    {
 	        try
 	        {
-	        	changeRating.setInt(1, rating);
-	            changeRating.executeUpdate();
+	        	getSpecificWorker.setString(1, passedUsernameWorker);
+	        	ResultSet rsWorker = getSpecificWorker.executeQuery();
+	        	
+	        	//int totalDeliveries = 0;
+	        	int totalRatings = 0;
+	        	int currentRating = 0;
+	        	
+	        	if(rsWorker.next())
+	        	{
+	        		//totalDeliveries = rsWorker.getInt("Total Deliveries");
+		        	totalRatings = rsWorker.getInt("Total Ratings");
+		        	currentRating = rsWorker.getInt("Rating");
+	        	}
+	        	else
+	        	{
+	        		System.out.println("ERROR NO SUCH WORKER FOR RATING CHANGE DB_CHANGE_RATING");
+	        		return;
+	        	}
+	        	
+	        	if (totalRatings == 0)
+	        	{
+	        		
+	        		changeRatingWorker.setInt(1, passedRating);
+	        		changeRatingWorker.setString(2, passedUsernameWorker);
+	        		changeRatingWorker.executeUpdate();
+	        		
+	        		updateTotalRatings.setInt(1, 1);
+	        		updateTotalRatings.setString(2, passedUsernameWorker);
+	        		updateTotalRatings.executeUpdate();
+	        		return;
+	        	}
+	        	else if (totalRatings > 0)
+	        	{
+	        		int newRating = ( ((totalRatings*currentRating) + passedRating) / (totalRatings+1) );
+	        		
+	        		changeRatingWorker.setInt(1, newRating);
+	        		changeRatingWorker.setString(2, passedUsernameWorker);
+	        		changeRatingWorker.executeUpdate();
+	        		
+	        		updateTotalRatings.setInt(1, 2);
+	        		updateTotalRatings.setString(2, passedUsernameWorker);
+	        		updateTotalRatings.executeUpdate();
+	        		return;
+	        	}
 	        }
 	        catch (SQLException sqle)
 	        {
@@ -987,7 +1045,7 @@ public class DBHelper {
 		return false;
 		
 	}
-    //TODO: update rating not here, just question
+    //TODO: when delivery is done update pending deliveries-- worker, total deliveries++
     
     
 	
