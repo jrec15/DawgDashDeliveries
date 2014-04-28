@@ -12,24 +12,27 @@ CREATE TABLE  `DawgDashDeliveries`.`Client` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-Worker:
 
-CREATE TABLE  `DawgDashDeliveries`.`Worker` (
-  `ID` int(11) NOT NULL DEFAULT '0',
-  `Name` varchar(30) NOT NULL,
-  `Email` varchar(30) NOT NULL,
-  `Username` varchar(30) NOT NULL,
-  `Password` varchar(30) NOT NULL,
-  `Transportation` int(11) NOT NULL,
+CREATE TABLE  `DawgDashDeliveries`.`Delivery` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Worker ID` int(11) NOT NULL,
+  `Delivery Status` tinyint(1) DEFAULT NULL,
   `Rating` int(11) NOT NULL,
-  `Total Ratings` int(11) NOT NULL,
-  `Total Deliveries` int(11) NOT NULL,
-  `Pending Deliveries` int(11) NOT NULL,
-  `Role` varchar(30) NOT NULL,
-  PRIMARY KEY (`ID`)
+  `Worker Comment` varchar(100) NOT NULL,
+  `Client Comment` varchar(100) NOT NULL,
+  `Time Completed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `Client ID` int(11) NOT NULL,
+  `Duration` int(11) NOT NULL,
+  `Price` double NOT NULL,
+  `Transportation` int(11) NOT NULL,
+  `Source Address` varchar(50) NOT NULL,
+  `Destination Address` varchar(50) NOT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `Worker` (`Worker ID`),
+  KEY `Client` (`Client ID`),
+  CONSTRAINT `Client` FOREIGN KEY (`Client ID`) REFERENCES `Client` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `Worker` FOREIGN KEY (`Worker ID`) REFERENCES `Worker` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-
-Schedule:
 
 CREATE TABLE  `DawgDashDeliveries`.`Schedule` (
   `Worker ID` int(11) NOT NULL,
@@ -44,36 +47,17 @@ CREATE TABLE  `DawgDashDeliveries`.`Schedule` (
   CONSTRAINT `Worker2` FOREIGN KEY (`Worker ID`) REFERENCES `Worker` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-Estimate:
-
-CREATE TABLE  `DawgDashDeliveries`.`Estimate` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Client ID` int(11) NOT NULL,
-  `Duration` int(11) NOT NULL,
-  `Price` double NOT NULL,
+CREATE TABLE  `DawgDashDeliveries`.`Worker` (
+  `ID` int(11) NOT NULL DEFAULT '0',
+  `Name` varchar(30) NOT NULL,
+  `Email` varchar(30) NOT NULL,
+  `Password` varchar(30) NOT NULL,
   `Transportation` int(11) NOT NULL,
-  `Source Address` varchar(50) NOT NULL,
-  `Destination Address` varchar(50) NOT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `Client` (`Client ID`),
-  CONSTRAINT `Client` FOREIGN KEY (`Client ID`) REFERENCES `Client` (`ID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
-
-Delivery:
-
-CREATE TABLE  `DawgDashDeliveries`.`Delivery` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Estimate ID` int(11) NOT NULL,
-  `Worker ID` int(11) NOT NULL,
-  `Delivery Status` tinyint(1) DEFAULT NULL,
-  `Payment Status` tinyint(1) DEFAULT NULL,
   `Rating` int(11) NOT NULL,
-  `Worker Comment` varchar(100) NOT NULL,
-  `Client Comment` varchar(100) NOT NULL,
-  `Time Completed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`ID`),
-  KEY `Worker` (`Worker ID`),
-  KEY `Estimate` (`Estimate ID`),
-  CONSTRAINT `Estimate` FOREIGN KEY (`Estimate ID`) REFERENCES `Estimate` (`ID`) ON DELETE CASCADE,
-  CONSTRAINT `Worker` FOREIGN KEY (`Worker ID`) REFERENCES `Worker` (`ID`)
+  `Total Ratings` int(11) NOT NULL,
+  `Total Deliveries` int(11) NOT NULL,
+  `Pending Deliveries` int(11) NOT NULL,
+  `Role` varchar(30) NOT NULL,
+  `Username` varchar(30) NOT NULL,
+  PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
