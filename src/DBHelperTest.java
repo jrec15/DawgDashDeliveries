@@ -17,7 +17,10 @@ public class DBHelperTest extends DBHelper {
 		super.setupWorker();
 		super.setupSchedule();
 		super.setupDelivery();
+<<<<<<< HEAD
 		
+=======
+>>>>>>> fe73e35f4c49386692edc060ab4bf933b3bd79f3
 	}
 	
 	@Test
@@ -31,12 +34,16 @@ public class DBHelperTest extends DBHelper {
     	assertNotNull("prepared statement should exist", helper.addWorkerStatement);
     	assertNotNull("prepared statement should exist", helper.setScheduleStatement);
     	assertNotNull("prepared statement should exist", helper.addDeliveryStatement);
+<<<<<<< HEAD
     	
+=======
+>>>>>>> fe73e35f4c49386692edc060ab4bf933b3bd79f3
     	
     	assertNotNull("prepared statement should exist", helper.listClientsStatement);
     	assertNotNull("prepared statement should exist", helper.listWorkersStatement);
     	assertNotNull("prepared statement should exist", helper.listSchedulesStatement);
     	assertNotNull("prepared statement should exist", helper.listDeliveriesStatement);
+<<<<<<< HEAD
     	
     	
     	assertNotNull("prepared statement should exist", helper.changeDeliveryStatus); 
@@ -47,6 +54,8 @@ public class DBHelperTest extends DBHelper {
 
     	assertNotNull("prepared statement should exist", helper.changeRatingWorker);
     	assertNotNull("prepared statement should exist", helper.changeRatingDelivery);
+=======
+>>>>>>> fe73e35f4c49386692edc060ab4bf933b3bd79f3
     	
     	assertNotNull("prepared statement should exist", helper.changeWorkerEmail);
     	assertNotNull("prepared statement should exist", helper.changeClientEmail);
