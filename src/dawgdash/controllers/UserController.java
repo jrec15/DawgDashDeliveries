@@ -1,4 +1,7 @@
-package dawgdashdeliveries.controllers;
+package dawgdash.controllers;
+
+import dawgdash.entities.*;
+import dawgdash.dbaccess.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ public class UserController extends HttpServlet {
 			// redirect to scheduling.jsp
 			if(session.getAttribute("role").equals("admin")) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/scheduling.jsp");
-				ArrayList<User> workers = helper.getWorkers();
+				ArrayList<Worker> workers = helper.getWorkerList();
 				request.setAttribute("workers", workers);
 				dispatcher.forward(request, response);
 			}
@@ -82,8 +85,8 @@ public class UserController extends HttpServlet {
 			}
 			else if(session.getAttribute("role").equals("worker")) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/worker_pending_deliveries.jsp");
-				User user = session.getAttribute("user");
-				int userId = user.getId();
+				User user = (User) session.getAttribute("user");
+				int userId = user.getID();
 				ArrayList<Delivery> pendingDeliveries = helper.getPendingWorkerDeliveriesFor(userId);
 				request.setAttribute("pending_deliveries", pendingDeliveries);
 				dispatcher.forward(request, response);
@@ -159,12 +162,12 @@ public class UserController extends HttpServlet {
 			
 			// make sure user is admin
 			if(session.getAttribute("role").equals("admin")) {
-				User user = session.getAttribute("user");
-				int id = user.getId();
+				User user = (User) session.getAttribute("user");
+				int id = user.getID();
 				String adminPassword = helper.getPasswordFor(id);
 				String providedAdminPassword = request.getParameter("admin_password");
 				// make sure admin password is correct
-				if(helper.hash(providedAdminPassword).equals(adminPassword)) {
+				if(helper.hashPassword(providedAdminPassword).equals(adminPassword)) {
 					String newPassword = request.getParameter("new_password");
 					String verifyPassword = request.getParameter("verify_password");
 					// make sure new password is at least 8 characters
@@ -172,7 +175,7 @@ public class UserController extends HttpServlet {
 						// make sure new password matches verification
 						if(newPassword.equals(verifyPassword)) {
 							int account = Integer.parseInt(request.getParameter("account"));
-							helper.updatePassword(account, helper.hash(newPassword));
+							helper.updatePassword(account, helper.hashPassword(newPassword));
 							RequestDispatcher dispatcher = ctx.getRequestDispatcher("/admin.jsp");
 							dispatcher.forward(request, response);
 						}
@@ -215,12 +218,12 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("ADMIN_CREATE_USER")) {
 			// if valid user creation, redirect to admin.jsp
 			if(session.getAttribute("role").equals("admin")) {
-				User user = session.getAttribute("user");
-				int id = user.getId();
+				User user = (User) session.getAttribute("user");
+				int id = user.getID();
 				String adminPassword = helper.getPasswordFor(id);
 				String providedAdminPassword = request.getParameter("admin_password");
 				// make sure admin password is correct
-				if(helper.hash(providedAdminPassword).equals(adminPassword)) {
+				if(helper.hashPassword(providedAdminPassword).equals(adminPassword)) {
 					String newPassword = request.getParameter("worker_password");
 					String verifyPassword = request.getParameter("verify_worker_password");
 					// make sure new password is at least 8 characters
@@ -405,10 +408,10 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("CUSTOMER_CHANGE_PASSWORD")) {
 			// if valid change, redirect to welcome.jsp with confirmation message
 			// else redirect to customer_modify_account.jsp with error message
-			User user = session.getAttribute("user");
+			User user = (User) session.getAttribute("user");
 			int userId = user.getId();
 			String currPassword = request.getParameter("old_password");
-			if(helper.hash(currPassword).equals(helper.getPasswordFor(userId))) {
+			if(helper.hashPassword(currPassword).equals(helper.getPasswordFor(userId))) {
 				String newPassword = request.getParameter("new_password");
 				String verifyPassword = request.getParameter("verify_password");
 				if(newPassword.length() >= 8) {
@@ -448,10 +451,10 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("CUSTOMER_CHANGE_EMAIL")) {
 			// if valid change, redirect to welcome.jsp with confirmation message
 			// else redirect to customer_modify_account.jsp with error message
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			String password = request.getParameter("password");
-			if(helper.hash(password).equals(helper.getPasswordFor(userId))) {
+			if(helper.hashPassword(password).equals(helper.getPasswordFor(userId))) {
 				String newEmail = request.getParameter("new_email");
 				String verifyEmail = request.getParameter("verify_email");
 				if(newEmail.length() >= 8) {
@@ -490,10 +493,10 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("CUSTOMER_CHANGE_ADDRESS")) {
 			// if valid change, redirect to welcome.jsp with confirmation message
 			// else redirect to customer_modify_account.jsp with error message
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			String password = request.getParameter("password");
-			if(helper.hash(password).equals(helper.getPasswordFor(userId))) {
+			if(helper.hashPassword(password).equals(helper.getPasswordFor(userId))) {
 				String address = request.getParameter("new_address");
 				String verifyAddress = request.getParameter("verify_address");
 				if(address.length() >= 16) {
@@ -626,10 +629,10 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("WORKER_CHANGE_PASSWORD")) {
 			// if valid password change, redirect to worker_pending_deliveries.jsp
 			// else redirect to worker_modify_account.jsp with error message
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			String currPassword = request.getParameter("old_password");
-			if(helper.hash(currPassword).equals(helper.getPasswordFor(userId))) {
+			if(helper.hashPassword(currPassword).equals(helper.getPasswordFor(userId))) {
 				String newPassword = request.getParameter("new_password");
 				String verifyPassword = request.getParameter("verify_password");
 				if(newPassword.length() >= 8) {
@@ -668,10 +671,10 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("WORKER_CHANGE_EMAIL")) {
 			// if valid email change, redirect to worker_pending_deliveries.jsp
 			// else redirect to worker_modify_account.jsp with error message
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			String password = request.getParameter("password");
-			if(helper.hash(password).equals(helper.getPasswordFor(userId))) {
+			if(helper.hashPassword(password).equals(helper.getPasswordFor(userId))) {
 				String newEmail = request.getParameter("new_email");
 				String verifyEmail = request.getParameter("verify_email");
 				if(newEmail.length() >= 8) {
@@ -710,10 +713,10 @@ public class UserController extends HttpServlet {
 		if(request.getParameter("task").equals("WORKER_CHANGE_VEHICLE")) {
 			// if valid transportation change, redirect to worker_pending_deliveries.jsp
 			// else redirect to worker_modify_account.jsp with error message
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			String password = request.getParameter("password");
-			if(helper.hash(password).equals(helper.getPasswordFor(userId))) {
+			if(helper.hashPassword(password).equals(helper.getPasswordFor(userId))) {
 				String transportation = request.getParameter("vehicle");
 				if(!transportation.equals("none")) {
 					int transportationValue = -1;

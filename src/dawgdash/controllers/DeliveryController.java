@@ -1,4 +1,7 @@
-package dawgdashdeliveries.controllers;
+package dawgdash.controllers;
+
+import dawgdash.dbaccess.*;
+import dawgdash.entities.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,8 +42,8 @@ public class DeliveryController extends HttpServlet {
 		if(request.getParameter("task").equals("CHECKOUT")) {
 			// redirect to checkout.jsp
 			// TODO change param value in checkout.jsp
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			ArrayList<Delivery> deliveries = helper.getPendingCustomerDeliveriesFor(userId);
 			int priceInt = 0;
 			for(Delivery delivery : deliveries) {
@@ -102,8 +105,8 @@ public class DeliveryController extends HttpServlet {
 		// ----------------------------------------------+
 		if(request.getParameter("task").equals("CUSTOMER_PAST_DELIVERY")) {
 			// redirect to customer_delivery.jsp 
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
 			Delivery delivery = helper.getDelivery(deliveryId);
 			request.setAttribute("delivery", delivery);
@@ -126,8 +129,8 @@ public class DeliveryController extends HttpServlet {
 		// ------------------------------------------+
 		if(request.getParameter("task").equals("CUSTOMER_PENDING_DELIVERIES")) {
 			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/customer_pending_deliveries.jsp");
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			ArrayList<Delivery> deliveries = helper.getPendingCustomerDeliveriesFor(userId);
 			request.setAttribute("pending_deliveries", deliveries);
 			dispatcher.forward(request, response);
@@ -139,8 +142,8 @@ public class DeliveryController extends HttpServlet {
 		// ---------------------------------------+
 		if(request.getParameter("task").equals("CUSTOMER_PAST_DELIVERIES")) {
 			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/previous_deliveries.jsp");
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			ArrayList<Delivery> deliveries = helper.getPreviousCustomerDeliveriesFor(userId);
 			request.setAttribute("past_deliveries", deliveries);
 			dispatcher.forward(request, response);
@@ -152,8 +155,8 @@ public class DeliveryController extends HttpServlet {
 		// ---------------------------------+
 		if(request.getParameter("task").equals("VIEW_DELIVERY")) {
 			// redirect to worker_delivery.jsp
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			Worker worker = (Worker) session.getAttribute("worker");
+			int userId = worker.getID();
 			int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
 			Delivery delivery = helper.getDelivery(deliveryId);
 			request.setAttribute("delivery", delivery);
@@ -198,12 +201,12 @@ public class DeliveryController extends HttpServlet {
 		if(request.getParameter("task").equals("CANCEL_DELIVERY")) {
 			// if more deliveries, redirect to customer_pending_deliveries.jsp
 			// else redirect to welcome.jsp
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
 			helper.cancelDelivery(deliveryId);
 			ArrayList<Delivery> deliveries = helper.getPendingCustomerDeliveriesFor(userId);
-			if(deliveries.empty()) {
+			if(deliveries.isEmpty()) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("welcome.jsp");
 				dispatcher.forward(request, response);
 			}
@@ -221,8 +224,8 @@ public class DeliveryController extends HttpServlet {
 		if(request.getParameter("task").equals("SCHEDULE_DELIVERY")) {
 			// if valid submission, redirect to customer_pending_deliveries.jsp
 			// else redirect to schedule_delivery.jsp with error message
-			User user = session.getAttribute("user");
-			int userId = user.getId();
+			User user = (User) session.getAttribute("user");
+			int userId = user.getID();
 			String pickupAddress = request.getParameter("pickup_address");
 			try {
 				if(pickupAddress.length() >= 16 || pickupAddress.length() == 0) {
