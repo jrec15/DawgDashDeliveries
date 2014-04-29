@@ -1,31 +1,20 @@
 SYNTAX FOR DAWGDASHDELIVERIES DATABASES
 
-Client:
+User:
 
-CREATE TABLE  `DawgDashDeliveries`.`Client` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Name` varchar(30) NOT NULL,
-  `Default Address` varchar(50) NOT NULL,
-  `Email` varchar(30) NOT NULL,
-  `Username` varchar(30) NOT NULL,
-  `Password` varchar(32) DEFAULT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8
-
-Worker:
-
-CREATE TABLE  `DawgDashDeliveries`.`Worker` (
+CREATE TABLE  `DawgDashDeliveries`.`User` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(30) NOT NULL,
   `Email` varchar(30) NOT NULL,
   `Password` varchar(32) DEFAULT NULL,
-  `Transportation` int(11) NOT NULL,
-  `Rating` int(11) NOT NULL,
-  `Total Ratings` int(11) NOT NULL,
-  `Total Deliveries` int(11) NOT NULL,
-  `Pending Deliveries` int(11) NOT NULL,
+  `Transportation` int(11) DEFAULT NULL,
+  `Rating` int(11) DEFAULT NULL,
+  `Total Ratings` int(11) DEFAULT NULL,
+  `Total Deliveries` int(11) DEFAULT NULL,
+  `Pending Deliveries` int(11) DEFAULT NULL,
   `Role` varchar(30) NOT NULL,
   `Username` varchar(30) NOT NULL,
+  `Client Address` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8
 
@@ -48,21 +37,21 @@ Delivery:
 
 CREATE TABLE  `DawgDashDeliveries`.`Delivery` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Worker ID` int(11) NOT NULL,
+  `Worker ID` int(11) DEFAULT NULL,
   `Delivery Status` varchar(30) NOT NULL,
   `Rating` int(11) NOT NULL,
   `Worker Comment` varchar(100) NOT NULL,
   `Client Comment` varchar(100) NOT NULL,
   `Time Completed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `Client ID` int(11) NOT NULL,
   `Duration` int(11) NOT NULL,
   `Price` double NOT NULL,
   `Transportation` int(11) NOT NULL,
   `Source Address` varchar(50) NOT NULL,
   `Destination Address` varchar(50) NOT NULL,
+  `Client ID` int(11) DEFAULT NULL,
   PRIMARY KEY (`ID`),
-  KEY `Worker2` (`Worker ID`),
+  KEY `User2` (`Worker ID`),
   KEY `Client` (`Client ID`),
-  CONSTRAINT `Client` FOREIGN KEY (`Client ID`) REFERENCES `Client` (`ID`) ON DELETE CASCADE,
-  CONSTRAINT `Worker2` FOREIGN KEY (`Worker ID`) REFERENCES `Worker` (`ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8
+  CONSTRAINT `Client` FOREIGN KEY (`Client ID`) REFERENCES `User` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `User2` FOREIGN KEY (`Worker ID`) REFERENCES `User` (`ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
