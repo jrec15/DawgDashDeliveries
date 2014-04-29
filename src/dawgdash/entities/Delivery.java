@@ -1,9 +1,14 @@
 package dawgdash.entities;
+//package dawgdashdeliveries;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
+import dawgdash.entities.Schedule;
+import dawgdash.entities.User;
+import dawgdash.dbaccess.DBHelper;
 
 public class Delivery {
 	private int ID;
@@ -19,7 +24,7 @@ public class Delivery {
 	private int transportation;
 	private String sourceAddress;
 	private String destinationAddress;
-
+	
 	/**
 	 * NOTE: This is only set to work for ASAP right now. To do a pickup time we would need that as a variable,
 	 * which we did not originally establish.
@@ -36,19 +41,19 @@ public class Delivery {
 		workerComment = "None";
 		this.clientComment = clientComment;
 		Date date = new Date();
-		timeCompleted = new Timestamp(date.getTime()); //Not sure what to do with timeCompleted here
+		timeCompleted = new Timestamp(date.getTime()); //TODO: Change to 00:00, as not finished, Not sure what to do with timeCompleted here
 		duration = 30;
 		price = 30;
 		this.transportation = transportation;
 		this.sourceAddress = sourceAddress;
 		this.destinationAddress = destinationAddress;
-
-		Worker bestWorker = null;
+		
+		User bestWorker = null;
 		int minutesLeft;
 		int minPending = 100;
 		int maxRating = -1;
 		DBHelper instance = new DBHelper();		
-		for (Worker worker : instance.getWorkerList()) {
+		for (User worker : instance.getUserList()) {
 			 Schedule schedule = instance.getSchedule(worker.getID());
 			 Calendar calendar = Calendar.getInstance();
 			 int day = calendar.get(Calendar.DAY_OF_WEEK);
@@ -81,7 +86,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -95,7 +100,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (2) : String[] monday = schedule.getSunday().split("-");
+				 case (2) : String[] monday = schedule.getMonday().split("-");
 				 			if (Integer.parseInt(monday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(monday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -123,7 +128,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -137,7 +142,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (3) : String[] tuesday = schedule.getSunday().split("-");
+				 case (3) : String[] tuesday = schedule.getTuesday().split("-");
 				 			if (Integer.parseInt(tuesday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(tuesday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -165,7 +170,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -179,7 +184,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (4) : String[] wednesday = schedule.getSunday().split("-");
+				 case (4) : String[] wednesday = schedule.getWednesday().split("-");
 				 			if (Integer.parseInt(wednesday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(wednesday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -207,7 +212,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -221,7 +226,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (5) : String[] thursday = schedule.getSunday().split("-");
+				 case (5) : String[] thursday = schedule.getThursday().split("-");
 				 			if (Integer.parseInt(thursday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(thursday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -249,7 +254,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -263,7 +268,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (6) : String[] friday = schedule.getSunday().split("-");
+				 case (6) : String[] friday = schedule.getFriday().split("-");
 				 			if (Integer.parseInt(friday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(friday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -291,7 +296,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -305,7 +310,7 @@ public class Delivery {
 				 				}
 				 			}
 				 			break;
-				 case (7) : String[] saturday = schedule.getSunday().split("-");
+				 case (7) : String[] saturday = schedule.getSaturday().split("-");
 				 			if (Integer.parseInt(saturday[0]) <= (calendar.get(Calendar.HOUR_OF_DAY))) {
 				 				boolean check = true;
 				 				if (Integer.parseInt(saturday[0]) == (calendar.get(Calendar.HOUR_OF_DAY))) {
@@ -333,7 +338,7 @@ public class Delivery {
 					 										maxRating = worker.getRating();
 					 										bestWorker = worker;
 					 									}
-					 									if (worker.getPendingDeliveries() == minPending) {
+					 									else if (worker.getPendingDeliveries() == minPending) {
 					 										if (worker.getRating() > maxRating) {
 					 											maxRating = worker.getRating();
 					 											bestWorker = worker;
@@ -353,10 +358,10 @@ public class Delivery {
 			workerID = bestWorker.getID();
 		}
 		else
-			workerID = 1;
-
+			workerID = 0;
+		
 	}
-
+	
 	/**
 	 * Creates a delivery object when we already know all the parameters. Will be used when getting deliveries from
 	 * the database.
@@ -448,7 +453,7 @@ public class Delivery {
 	public void setTimeCompleted(Timestamp timeCompleted) {
 		this.timeCompleted = timeCompleted;
 	}
-
+	
 	public int getClientID() {
 		return clientID;
 	}

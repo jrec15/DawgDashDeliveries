@@ -1,3 +1,4 @@
+package dawgdash.dbaccess;
 //package dawgdashdeliveries;
 
 import static org.junit.Assert.*;
@@ -7,6 +8,8 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+import dawgdash.entities.User;
+import dawgdash.dbaccess.DBHelper;
 
 
 public class DBHelperTest extends DBHelper {

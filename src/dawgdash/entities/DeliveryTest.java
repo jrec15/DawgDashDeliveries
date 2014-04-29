@@ -1,3 +1,4 @@
+package dawgdash.entities;
 //package dawgdashdeliveries;
 
 import static org.junit.Assert.*;
@@ -7,6 +8,10 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+import dawgdash.entities.Delivery;
+import dawgdash.entities.Schedule;
+import dawgdash.entities.User;
+import dawgdash.dbaccess.DBHelper;
 
 public class DeliveryTest {
 	
