@@ -53,6 +53,15 @@ public class DBHelper {
 	protected PreparedStatement getSpecificDelivery;
 	protected PreparedStatement getSpecificUser;//
 	protected PreparedStatement updateTotalRatings;//
+	
+	// added by Andrew, some redundancy
+	protected PreparedStatement getUserWithLoginIdStatement;
+	protected PreparedStatement changePasswordStatement;
+	protected PreparedStatement changeEmailStatement;
+	protected PreparedStatement changeAddressStatement;
+	protected PreparedStatement changeTransportationStatement;
+	protected PreparedStatement getAddressStatement;
+	protected PreparedStatement getPendingDeliveriesStatement;
 
 	public DBHelper() throws Exception {
 		//Might need to change to match your info
@@ -117,6 +126,14 @@ public class DBHelper {
 			checkIfValidLogin = conn.prepareStatement("SELECT `Password` FROM `User` WHERE `Username` = ?");
 			checkIfUsernameExists = conn.prepareStatement("SELECT COUNT(`Password`) FROM `User` WHERE `Username` = ?");
 			checkIfEmailExists = conn.prepareStatement("SELECT COUNT(`Email`) FROM `User` WHERE `Email` = ?");
+			
+			getUserWithLoginIdStatement = conn.prepareStatement("select * from users where username=?");
+			changePasswordStatement = conn.prepareStatement("update users set password=? where id=?");
+			changeEmailStatement = conn.prepareStatement("update users set email=? where id=?");
+			changeAddressStatement = conn.prepareStatement("update users set `client address`=? where id=?");
+			changeTransportationStatement = conn.prepareStatement("update users set transportation=? where id=?");
+			getAddressStatement = conn.prepareStatement("select `client address` from users where id=?");
+			getPendingDeliveriesStatement = conn.prepareStatement("select * from deliveries where id=? and `delivery status`=pending");
 		}
 		catch (SQLException sqle) {
 			System.out.println("Exception in Constructor:" + sqle.getMessage());
@@ -924,9 +941,144 @@ public class DBHelper {
 
 	
 	//TODO: when delivery is done update pending deliveries-- worker, total deliveries++
+	
+	//Iplemented by Andrew
 
-
-
+	public String attemptLogin(String loginId, String password) {
+		try {
+			getUserWithLoginIdStatement.setString(1, loginId);
+			ResultSet rs = getUserWithLoginIdStatement.executeQuery();
+			if(!rs.next()) {
+				return "error";
+			}
+			else {
+				String hashedPassword = hashPassword(password);
+				if(!hashedPassword.equals(rs.getString("password"))) {
+					return "error";
+				}
+				else {
+					return rs.getString("role");
+				}
+			}
+		}
+		catch (SQLException sqle) {
+			
+		}
+		
+	}
+	
+	public void updatePassword(int userId, String password) {
+		try {
+			changePasswordStatement.setString(1,hashPassword(password));
+			changePasswordStatement.setInt(2, userId);
+			changePasswordStatement.executeUpdate();
+		}
+		catch(SQLException sqle) {
+			
+		}
+	}
+	
+	public void updateEmail(int userId, String email) {
+		try {
+			changeEmailStatement.setString(1, email);
+			changeEmailStatement.setInt(2, userId);
+			changeEmailStatement.executeUpdate();
+		}
+		catch(SQLException sqle) {
+			
+		}
+	}
+	
+	public void updateAddress(int userId, String address) {
+		try {
+			changeAddressStatement.setString(1, address);
+			changeAddressStatement.setInt(2, userId);
+			changeAddressStatement.executeUpdate();
+		}
+		catch(SQLException sqle) {
+			
+		}
+	}
+	
+	public void updateTransportation(int userId, int transportation) {
+		try {
+			changeTransportationStatement.setInt(1, transportation);
+			changeTransportationStatement.setInt(2, userId);
+			changeTransportationStatement.executeUpdate();
+		}
+		catch(SQLException sqle) {
+			
+		}
+	}
+	
+	public ArrayList<Delivery> getPendingDeliveryListClient(int clientID){
+		ArrayList<Delivery> deliveryList = getDeliveryList();
+		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
+		for(int i = 0; i < deliveryList.size(); i++){
+			//get the client ID to check by getting the estimate ID first, which has a client ID attached
+			int checkID = deliveryList.get(i).getClientID();
+			if(checkID == clientID && deliveryList.get(i).getDeliveryStatus().equals("Pending")){
+				filteredList.add(deliveryList.get(i));
+			}
+		}
+		if(filteredList.size() > 0){
+			return filteredList;
+		}else{
+			System.out.println("No deliveries found for client with id " + clientID);
+			return null;
+		}
+	}
+	
+	public ArrayList<Delivery> getPastDeliveryListClient(int clientID){
+		ArrayList<Delivery> deliveryList = getDeliveryList();
+		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
+		for(int i = 0; i < deliveryList.size(); i++){
+			//get the client ID to check by getting the estimate ID first, which has a client ID attached
+			int checkID = deliveryList.get(i).getClientID();
+			if(checkID == clientID && deliveryList.get(i).getDeliveryStatus().equals("Complete")){
+				filteredList.add(deliveryList.get(i));
+			}
+		}
+		if(filteredList.size() > 0){
+			return filteredList;
+		}else{
+			System.out.println("No deliveries found for client with id " + clientID);
+			return null;
+		}
+	}
+	
+	public String getDefaultAddress(int id) {
+		try {
+			getAddressStatement.setInt(1, id);
+			ResultSet rs = getAddressStatement.executeQuery();
+			if(!rs.next() || rs.getString("client address") == null || rs.getString("client address").length() == 0) {
+				return "error";
+			}
+			else {
+				return rs.getString("client address");
+			}
+		}
+		catch(SQLException e) {
+			
+		}
+	}
+	
+	public void makeAllDeliveriesInProgress(int id) {
+		try {
+			getPendingDeliveriesStatement.setInt(1, id);
+			ResultSet rs = getInProgressDeliveriesStatement.executeQuery();
+			while(rs.next()) {
+				int deliveryId = rs.getInt("id");
+				changeDeliveryStatus.setString(1, "In progress");
+				changeDeliveryStatus.setInt(deliveryId);
+				changeDeliveryStatus.executeUpdate();
+			}
+			
+		}
+		catch(SQLException sqle) {
+			
+		}
+	}
 
 }
 

@@ -4,6 +4,7 @@ import dawgdash.dbaccess.*;
 import dawgdash.entities.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
@@ -31,7 +32,9 @@ public class DeliveryController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		DBHelper helper = new DBHelper();
+		DBHelper helper;
+		try {
+			helper = new DBHelper();
 		ServletContext ctx = this.getServletContext();
 		HttpSession session = request.getSession();
 		
@@ -44,9 +47,15 @@ public class DeliveryController extends HttpServlet {
 			// TODO change param value in checkout.jsp
 			User user = (User) session.getAttribute("user");
 			int userId = user.getID();
-			ArrayList<Delivery> deliveries = helper.getPendingCustomerDeliveriesFor(userId);
+			ArrayList<Delivery> deliveries = helper.getDeliveryListClient(userId);
+			ArrayList<Delivery> resultList = new ArrayList<Delivery>();
+			for (Delivery delivery : deliveries) {
+				if ((delivery.getDeliveryStatus()).equals("Pending")) {
+					resultList.add(delivery);
+				}
+			}
 			int priceInt = 0;
-			for(Delivery delivery : deliveries) {
+			for(Delivery delivery : resultList) {
 				priceInt += delivery.getPrice();
 			}
 			String price = Integer.toString(priceInt);
@@ -74,20 +83,20 @@ public class DeliveryController extends HttpServlet {
 					dispatcher.forward(request, response);
 				}
 				else if(size.equals("letter")) {
-					price = "5";
+					price = "$5.00";
 					request.setAttribute("price", price);
 					RequestDispatcher dispatcher = ctx.getRequestDispatcher("/index.jsp");
 					dispatcher.forward(request, response);
 				}
 				else if(size.equals("small")) {
 					priceInt = 5 + 1 * quantity;
-					price = Integer.toString(priceInt);
+					price = "$" + Integer.toString(priceInt) + ".00";
 					RequestDispatcher dispatcher = ctx.getRequestDispatcher("/index.jsp");
 					dispatcher.forward(request, response);
 				}
 				else if(size.equals("large")) {
 					priceInt = 5 + 2 * quantity;
-					price = Integer.toString(priceInt);
+					price = "$" + Integer.toString(priceInt) + ".00";
 					RequestDispatcher dispatcher = ctx.getRequestDispatcher("/index.jsp");
 					dispatcher.forward(request, response);
 				}
@@ -131,7 +140,7 @@ public class DeliveryController extends HttpServlet {
 			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/customer_pending_deliveries.jsp");
 			User user = (User) session.getAttribute("user");
 			int userId = user.getID();
-			ArrayList<Delivery> deliveries = helper.getPendingCustomerDeliveriesFor(userId);
+			ArrayList<Delivery> deliveries = helper.getPendingDeliveryListClient(userId);
 			request.setAttribute("pending_deliveries", deliveries);
 			dispatcher.forward(request, response);
 		}
@@ -144,7 +153,7 @@ public class DeliveryController extends HttpServlet {
 			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/previous_deliveries.jsp");
 			User user = (User) session.getAttribute("user");
 			int userId = user.getID();
-			ArrayList<Delivery> deliveries = helper.getPreviousCustomerDeliveriesFor(userId);
+			ArrayList<Delivery> deliveries = helper.getPastDeliveryListClient(userId);
 			request.setAttribute("past_deliveries", deliveries);
 			dispatcher.forward(request, response);
 		}
@@ -155,7 +164,7 @@ public class DeliveryController extends HttpServlet {
 		// ---------------------------------+
 		if(request.getParameter("task").equals("VIEW_DELIVERY")) {
 			// redirect to worker_delivery.jsp
-			Worker worker = (Worker) session.getAttribute("worker");
+			User worker = (User) session.getAttribute("worker");
 			int userId = worker.getID();
 			int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
 			Delivery delivery = helper.getDelivery(deliveryId);
@@ -163,13 +172,20 @@ public class DeliveryController extends HttpServlet {
 			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/worker_delivery.jsp");
 			dispatcher.forward(request, response);
 		}
+		}
+		catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		DBHelper helper = new DBHelper();
+		try {
+			DBHelper helper = new DBHelper();
+		
 		ServletContext ctx = this.getServletContext();
 		HttpSession session = request.getSession();
 		
@@ -205,7 +221,7 @@ public class DeliveryController extends HttpServlet {
 			int userId = user.getID();
 			int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
 			helper.cancelDelivery(deliveryId);
-			ArrayList<Delivery> deliveries = helper.getPendingCustomerDeliveriesFor(userId);
+			ArrayList<Delivery> deliveries = helper.getDeliveryListClient(userId);
 			if(deliveries.isEmpty()) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("welcome.jsp");
 				dispatcher.forward(request, response);
@@ -249,10 +265,12 @@ public class DeliveryController extends HttpServlet {
 							}
 							String description = request.getParameter("description");
 							if(description.length() >= 8) {
-								String instruction = request.getParameter("instructions");
+								String instructions = request.getParameter("instructions");
 								String pickupTime = request.getParameter("time");
 								if(!pickupTime.equals("none")) {
-									helper.scheduleDelivery(userId, pickupAddress, destinationAddress, quantity, sizeInt, description, instruction, pickupTime);
+									Delivery delivery = new Delivery(userId, instructions, sizeInt, pickupAddress, destinationAddress);
+									//helper.scheduleDelivery(userId, pickupAddress, destinationAddress, quantity, sizeInt, description, instructions, pickupTime);
+									helper.addDelivery(delivery);
 								}
 								else {
 									request.setAttribute("error", "Error: must select pickup time");
@@ -289,7 +307,7 @@ public class DeliveryController extends HttpServlet {
 					return;
 				}
 			}
-			catch (NumberFormatException e) {
+			catch (Exception e) {
 				request.setAttribute("error", "Error: must enter integer with only numberic characters");
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/schedule_delivery.jsp");
 				dispatcher.forward(request, response);
@@ -306,7 +324,11 @@ public class DeliveryController extends HttpServlet {
 			String comment = request.getParameter("comment");
 			if(comment.length() >= 8) {
 				int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
-				helper.addWorkerComment(deliveryId, comment);
+				try {
+					helper.changeWorkerComment(deliveryId, comment);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/worker_pending_deliveries.jsp");
 				dispatcher.forward(request, response);
 			} else {
@@ -323,9 +345,14 @@ public class DeliveryController extends HttpServlet {
 		if(request.getParameter("task").equals("UNCOMPLETABLE")) {
 			// redirect to worker_pending_deliveries.jsp
 			int deliveryId = Integer.parseInt(request.getParameter("delivery_id"));
-			helper.markUncompletable(deliveryId);
+			helper.changeDeliveryStatus(deliveryId, "Uncompletable");
 			RequestDispatcher dispatcher = ctx.getRequestDispatcher("/worker_pending_deliveries.jsp");
 			dispatcher.forward(request, response);
+		}
+		}
+		catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 

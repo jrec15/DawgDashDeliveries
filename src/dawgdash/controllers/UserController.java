@@ -43,7 +43,7 @@ public class UserController extends HttpServlet {
 			// redirect to scheduling.jsp
 			if(session.getAttribute("role").equals("admin")) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/scheduling.jsp");
-				ArrayList<Worker> workers = helper.getWorkerList();
+				ArrayList<User> workers = helper.getUserList();
 				request.setAttribute("workers", workers);
 				dispatcher.forward(request, response);
 			}
@@ -62,7 +62,7 @@ public class UserController extends HttpServlet {
 			// redirect to account_administration.jsp
 			if(session.getAttribute("role").equals("admin")) {
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/account_administration.jsp");
-				ArrayList<User> users = helper.getAllUsers();
+				ArrayList<User> users = helper.getUserList();
 				request.setAttribute("users", users);
 				dispatcher.forward(request, response);
 			}
@@ -106,7 +106,7 @@ public class UserController extends HttpServlet {
 			if(session.getAttribute("role").equals("admin")) {
 				// redirect to individual_schedule.jsp
 				int workerId = Integer.parseInt(request.getParameter("worker_id"));
-				Schedule schedule = helper.getScheduleForId(workerId);
+				Schedule schedule = helper.getSchedule(workerId);
 				request.setAttribute("schedule", schedule);
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/individual_schedule.jsp");
 				dispatcher.forward(request, response);
@@ -409,7 +409,7 @@ public class UserController extends HttpServlet {
 			// if valid change, redirect to welcome.jsp with confirmation message
 			// else redirect to customer_modify_account.jsp with error message
 			User user = (User) session.getAttribute("user");
-			int userId = user.getId();
+			int userId = user.getID();
 			String currPassword = request.getParameter("old_password");
 			if(helper.hashPassword(currPassword).equals(helper.getPasswordFor(userId))) {
 				String newPassword = request.getParameter("new_password");
@@ -446,7 +446,7 @@ public class UserController extends HttpServlet {
 		
 		// ------------------------------------------+
 		// customer attempts to change email address |
-		// customer_modify_account.jsp               |
+		// customer_modify_accounst.jsp               |
 		// ------------------------------------------+
 		if(request.getParameter("task").equals("CUSTOMER_CHANGE_EMAIL")) {
 			// if valid change, redirect to welcome.jsp with confirmation message
@@ -567,7 +567,7 @@ public class UserController extends HttpServlet {
 				dispatcher.forward(request, response);
 			}
 			// else redirect to index.jsp with error message
-			else if(role.equals("loginIdError")) {
+			else if(role.equals("error")) {
 				request.setAttribute("error", "Unable to match username or password");
 				RequestDispatcher dispatcher = ctx.getRequestDispatcher("/index.jsp");
 				dispatcher.forward(request, response);
