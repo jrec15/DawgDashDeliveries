@@ -38,8 +38,6 @@ public class DBHelper {
 	protected PreparedStatement changeRatingWorker;//
 	protected PreparedStatement changeRatingDelivery;
 
-
-
 	protected PreparedStatement changeWorkerPendingDeliveries;//
 
 	protected PreparedStatement changeUserEmail;//
@@ -47,8 +45,10 @@ public class DBHelper {
 	protected PreparedStatement changeUserPassword;//
 	protected PreparedStatement changeWorkerTransportation;//
 	protected PreparedStatement removeUser;//
+	protected PreparedStatement cancelDelivery;
 	protected PreparedStatement checkIfValidLogin;//
 	protected PreparedStatement checkIfUsernameExists;//
+	protected PreparedStatement checkIfEmailExists;
 
 	protected PreparedStatement getSpecificDelivery;
 	protected PreparedStatement getSpecificUser;//
@@ -107,7 +107,8 @@ public class DBHelper {
 			changeWorkerTransportation = conn.prepareStatement("UPDATE `User` SET `Transportation` = ? WHERE `ID` = ?");
 			changeDefaultAddress = conn.prepareStatement("UPDATE `User` SET `Client Address` = ? WHERE `ID` = ?");
 			changeUserPassword = conn.prepareStatement("UPDATE `User` SET `Password` = ? WHERE `ID` = ?");
-			removeUser = conn.prepareStatement("DELETE FROM `User` WHERE `ID` = ?");		
+			removeUser = conn.prepareStatement("DELETE FROM `User` WHERE `ID` = ?");
+			cancelDelivery = conn.prepareStatement("DELETE FROM `Delivery` WHERE `ID` = ?");
 			getSpecificDelivery = conn.prepareStatement("SELECT * FROM `Delivery` WHERE `ID` = ?");
 			getSpecificUser = conn.prepareStatement("SELECT * FROM `User` WHERE `ID` = ?");
 			updateTotalRatings = conn.prepareStatement("UPDATE `User` SET `Total Ratings` = ? WHERE `ID` = ?");
@@ -115,6 +116,7 @@ public class DBHelper {
 			//Relates to login so username already passed in during field checks
 			checkIfValidLogin = conn.prepareStatement("SELECT `Password` FROM `User` WHERE `Username` = ?");
 			checkIfUsernameExists = conn.prepareStatement("SELECT COUNT(`Password`) FROM `User` WHERE `Username` = ?");
+			checkIfEmailExists = conn.prepareStatement("SELECT COUNT(`Email`) FROM `User` WHERE `Email` = ?");
 		}
 		catch (SQLException sqle) {
 			System.out.println("Exception in Constructor:" + sqle.getMessage());
@@ -230,9 +232,9 @@ public class DBHelper {
 		return null;
 	}
 	
-	/** ADD OR DELETE LATER IF WE NEED OR DONT NEED
+	/** 
 	 * Returns a list of deliveries for a single client
-	 *
+	 */
 	public ArrayList<Delivery> getDeliveryListClient(int clientID){
 		ArrayList<Delivery> deliveryList = getDeliveryList();
 		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
@@ -252,7 +254,7 @@ public class DBHelper {
 	}
 	/**
 	 * Returns a list of deliveries for a single worker
-	 *
+	 */
 	public ArrayList<Delivery> getDeliveryListWorker(int workerID){
 		ArrayList<Delivery> deliveryList = getDeliveryList();
 		ArrayList<Delivery> filteredList = new ArrayList<Delivery>();
@@ -264,11 +266,11 @@ public class DBHelper {
 		if(filteredList.size() > 0){
 			return filteredList;
 		}else{
-			System.out.println("No deliveries found for worker with idsdrs " + workerID);
+			System.out.println("No deliveries found for worker with id " + workerID);
 			return null;
 		}
 	}
-	**/
+	
 	
 	/**
 	 * Returns the schedule for the worker with the specified worker ID
@@ -758,6 +760,33 @@ public class DBHelper {
 		return hash;
 
 	}
+	
+	//UNTESTED LOOK INTO MORE LATER
+	public boolean checkIfEmailExists(String email) {
+		
+		try
+		{
+			String receivedEmail = email.trim();
+			checkIfEmailExists.setString(1, receivedEmail);
+			ResultSet rsCount = checkIfEmailExists.executeQuery();
+			if(rsCount.next())
+			{
+				int count = rsCount.getInt("COUNT(`Email`)");
+				if (count == 1)
+				{
+					System.out.println("BAD EMAIL");
+					return false;
+				}
+			}
+			else 
+				return true;
+		}
+		catch (SQLException sqle)
+		{
+			System.out.println("ERROR IN CHECK_IF_VALID_EMAIL: " + sqle.getMessage());
+		}
+		return false; //not sure
+	}
 
 	//Called from checkIfValidLogin
 	public boolean checkIfValidLogin(String passedUsername, String passedPassword) throws NoSuchAlgorithmException, UnsupportedEncodingException
@@ -877,6 +906,19 @@ public class DBHelper {
 		catch (SQLException sqle)
 		{
 			System.out.println("ERROR IN DELETE USER: " + sqle.getMessage());
+		}
+	}
+	
+	public void cancelDelivery(int deliveryID)
+	{
+		try
+		{
+			cancelDelivery.setInt(1,deliveryID);
+			cancelDelivery.executeUpdate();
+		}
+		catch (SQLException sqle)
+		{
+			System.out.println("ERROR IN CANCEL DELIVERY: " + sqle.getMessage());
 		}
 	}
 
